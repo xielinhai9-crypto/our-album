@@ -379,7 +379,7 @@ async function gPut(path,content,shaVal,msg){
 const body={message:msg||'Update',content:b64enc(JSON.stringify(content)),branch:'main'};
 if(shaVal)body.sha=shaVal;
 const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{method:'PUT',headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
-if(!r.ok){if(r.status===409){await loadData();return gPut(path,content,sha,msg+' (retry)')}throw Error('保存失败('+r.status+')')}
+if(!r.ok){if(r.status===401||r.status===403){localStorage.removeItem('gh_token');ghToken='';throw Error('Token已失效，请刷新页面重新输入')}if(r.status===409){await loadData();return gPut(path,content,sha,msg+' (retry)')}throw Error('保存失败('+r.status+')')}
 const j=await r.json();return j.content.sha
 }
 
@@ -432,6 +432,10 @@ if(!ghToken){showTP();return}
 initAfterToken()
 }
 async function initAfterToken(){
+try{
+const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+DF,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
+if(r.status===401||r.status===403){toast('Token已失效，请重新输入',1);localStorage.removeItem('gh_token');showTP();return}
+}catch(e){}
 initSegTabs();initFab();
 await loadData();
 updateFabMenu();renderAlbums()
