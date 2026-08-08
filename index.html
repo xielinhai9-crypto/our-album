@@ -48,10 +48,38 @@ body.no-scroll{overflow:hidden}
 .seg-btn.active{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-weight:600;box-shadow:0 2px 12px rgba(247,168,184,.2)}
 .seg-btn:active{transform:scale(.96)}
 
-/* ========== Page transitions — pure CSS driven, no overlay ========== */
+/* Page transitions */
 .page-wrap{position:relative;overflow:hidden;padding-top:4px}
 .page{display:block;position:absolute;top:0;left:0;width:100%;padding:0 16px;opacity:0;transform:translateY(8px);filter:blur(4px);pointer-events:none;transition:opacity .28s var(--e),transform .28s var(--e),filter .28s var(--e)}
 .page.active{position:relative;opacity:1;transform:translateY(0);filter:blur(0);pointer-events:auto}
+
+/* ========== Album List ========== */
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:8px 0 16px}
+@media(max-width:480px){.album-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+.album-card{position:relative;border-radius:var(--r3);overflow:hidden;aspect-ratio:4/3;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border:.5px solid var(--gb);box-shadow:var(--sh2);cursor:pointer;transition:transform .4s var(--es),box-shadow .35s var(--e);animation:pe .4s var(--es) both}
+.album-card:hover{transform:translateY(-3px);box-shadow:var(--sh3)}
+.album-card:active{transform:scale(.97)}
+.album-card .ac-cover{width:100%;height:100%;object-fit:cover;display:block;background:var(--bg3)}
+.album-card .ac-empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:42px;opacity:.25;background:var(--bg3)}
+.album-card .ac-info{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff}
+.album-card .ac-info .ac-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.album-card .ac-info .ac-count{font-size:12px;opacity:.75}
+.album-card .ac-del{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s var(--e),transform .15s var(--e);z-index:2}
+.album-card:hover .ac-del{opacity:1}
+.album-card .ac-del:active{transform:scale(.85)}
+.album-card .ac-del.hidden{display:none}
+.album-add-btn{aspect-ratio:4/3;border-radius:var(--r3);border:2px dashed var(--div);background:transparent;color:var(--tx3);font-size:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s var(--e)}
+.album-add-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(247,168,184,.06)}
+
+/* Album photos header */
+.album-hdr{display:flex;align-items:center;gap:12px;padding:4px 0 12px}
+.album-hdr .ah-back{width:36px;height:36px;border-radius:50%;border:none;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--e);flex-shrink:0}
+.album-hdr .ah-back:active{transform:scale(.9)}
+.album-hdr .ah-title{flex:1;font-size:17px;font-weight:600;text-align:center}
+.album-hdr .ah-del{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,107,138,.1);color:var(--danger);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:transform .2s var(--e);flex-shrink:0}
+.album-hdr .ah-del.show{display:flex}
+.album-hdr .ah-del:active{transform:scale(.9)}
+.album-hdr .ah-spacer{width:36px;height:36px;flex-shrink:0}
 
 /* ========== Photos Grid — 3D Dashboard ========== */
 .actions{display:flex;gap:8px;padding:8px 0 16px;flex-wrap:wrap}
@@ -94,25 +122,32 @@ body.no-scroll{overflow:hidden}
 @keyframes fI{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ========== Viewer ========== */
-.viewer{position:fixed;inset:0;z-index:200;display:none;background:rgba(0,0,0,.88);flex-direction:column}
-.viewer.open{display:flex;animation:vIn .25s var(--e)}
-@keyframes vIn{from{opacity:0}to{opacity:1}}
-.viewer .v-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.viewer .v-top button{background:rgba(255,255,255,.12);border:none;color:#fff;padding:8px 16px;border-radius:var(--rf);font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),background .15s var(--e)}
-.viewer .v-top button:active{transform:scale(.95);background:rgba(255,255,255,.25)}
-.viewer .v-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;touch-action:pan-x;position:relative}
-.viewer .v-wrap .v-media{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 16px 64px rgba(0,0,0,.5)}
-.viewer .v-nav{position:absolute;top:50%;transform:translateY(-50%)}
-.viewer .v-nav.prev{left:8px}.viewer .v-nav.next{right:8px}
-.viewer .v-nav button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
-.viewer .v-nav button:active{transform:scale(.9)}
-.viewer .v-info{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:rgba(255,255,255,.7);font-size:13px;gap:8px}
-.viewer .v-info .v-note{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:rgba(255,255,255,.85);cursor:pointer;padding:4px 10px;border-radius:var(--rf);transition:background .15s var(--e)}
-.viewer .v-info .v-note.placeholder{opacity:.4;font-style:italic}
-.viewer .v-info .v-edit{background:rgba(255,255,255,.12);border:none;color:#fff;padding:5px 12px;border-radius:var(--rf);font-size:12px;cursor:pointer;transition:transform .15s var(--e)}
-.viewer .v-info .v-edit:active{transform:scale(.95)}
+.viewer{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center}
+.viewer.open{display:flex}
+.v-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);animation:vFade .35s var(--e)}
+@keyframes vFade{from{opacity:0}to{opacity:1}}
+.v-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));z-index:5;animation:vFade .35s var(--e)}
+.v-top button{background:rgba(255,255,255,.12);border:none;color:#fff;padding:8px 16px;border-radius:var(--rf);font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),background .15s var(--e)}
+.v-top button:active{transform:scale(.95);background:rgba(255,255,255,.25)}
+.v-media-wrap{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;flex:1;min-height:0;touch-action:pan-x;padding-top:60px}
+.v-media{max-width:90vw;max-height:55vh;object-fit:contain;border-radius:12px;box-shadow:0 16px 64px rgba(0,0,0,.5);transition:all .35s var(--e)}
+.v-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:5}
+.v-nav.prev{left:8px}.v-nav.next{right:8px}
+.v-nav button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
+.v-nav button:active{transform:scale(.9)}
 
-/* ========== Notes (Memos & Recipes) — Dashboard big info cards ========== */
+/* Viewer dual notes */
+.v-notes{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;padding-bottom:max(14px,env(safe-area-inset-bottom));background:rgba(0,0,0,.35);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:5;animation:vSlideUp .35s var(--e)}
+@keyframes vSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.v-notes-row{display:flex;gap:10px}
+@media(max-width:640px){.v-notes-row{flex-direction:column;gap:8px}}
+.v-note-box{flex:1;min-width:0}
+.v-note-box .vn-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:5px;padding-left:2px;text-transform:uppercase;letter-spacing:.04em}
+.v-note-box .vn-input{width:100%;padding:10px 13px;border-radius:12px;border:0.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font-size:14px;outline:none;font-family:inherit;transition:border-color .2s var(--e),background .2s var(--e);resize:none;min-height:42px;line-height:1.4}
+.v-note-box .vn-input::placeholder{color:rgba(255,255,255,.28)}
+.v-note-box .vn-input:focus{border-color:rgba(247,168,184,.5);background:rgba(255,255,255,.1)}
+
+/* ========== Notes (Memos & Recipes) ========== */
 .note-list{padding:8px 0 16px}
 .note-card{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--r3);padding:20px;border:.5px solid var(--gb);box-shadow:var(--sh2);margin-bottom:12px;transition:transform .4s var(--es),box-shadow .35s var(--e);animation:pe .4s var(--es) both;cursor:pointer}
 .note-card:hover{transform:translateY(-2px);box-shadow:var(--sh3)}
@@ -133,7 +168,7 @@ body.no-scroll{overflow:hidden}
 .notes-actions button{padding:10px 20px;border-radius:var(--rf);border:none;font-size:14px;font-weight:500;cursor:pointer;background:linear-gradient(135deg,var(--ac2),var(--ac3));color:#fff;transition:transform .15s var(--e)}
 .notes-actions button:active{transform:scale(.96)}
 
-/* ========== Note Editor Modal ========== */
+/* Editor */
 .editor{display:none;position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:16px;align-items:flex-end}
 .editor.open{display:flex;animation:fI .25s var(--e)}
 .editor .ed{background:var(--bg2);border-radius:var(--r4) var(--r4) 0 0;width:100%;max-width:600px;margin:0 auto;padding:20px 16px;padding-bottom:max(20px,env(safe-area-inset-bottom));animation:esSlide .35s var(--es)}
@@ -153,7 +188,7 @@ body.no-scroll{overflow:hidden}
 .editor .ed .ed-btns .cfm{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-weight:600}
 .editor .ed .ed-btns .add-img{background:var(--bg3);color:var(--tx2);font-size:13px}
 
-/* Modal confirm */
+/* Modal */
 .modal-overlay{position:fixed;inset:0;z-index:300;display:none;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px}
 .modal-overlay.open{display:flex;animation:fI .2s var(--e)}
 .modal{background:var(--bg2);border-radius:var(--r4);padding:24px;width:100%;max-width:380px;box-shadow:var(--sh3);animation:me .35s var(--es)}
@@ -168,7 +203,7 @@ body.no-scroll{overflow:hidden}
 .modal .btns .cnl{background:var(--bg3);color:var(--tx)}
 .modal .btns .cfm{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-weight:600}
 
-/* Toast */
+/* Toast & Progress */
 .toast{position:fixed;top:calc(16px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%) translateY(-130%);background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border:.5px solid var(--gb);border-radius:var(--rf);padding:10px 22px;font-size:14px;font-weight:500;color:var(--tx);box-shadow:var(--sh2);z-index:350;transition:transform .4s var(--es);pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.danger{color:var(--danger)}
@@ -177,7 +212,7 @@ body.no-scroll{overflow:hidden}
 .progress .bar{width:100px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
 .progress .bar .fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac3));border-radius:2px;transition:width .3s var(--e)}
 
-/* ========== Floating Action Button (FAB) ========== */
+/* ========== FAB ========== */
 .fab{position:fixed;right:20px;bottom:calc(28px + env(safe-area-inset-bottom,0));z-index:400;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:12px}
 .fab-menu{display:flex;flex-direction:column-reverse;align-items:flex-end;gap:10px;pointer-events:none}
 .fab.open .fab-menu{pointer-events:auto}
@@ -186,6 +221,7 @@ body.no-scroll{overflow:hidden}
 .fab.open .fab-item:nth-child(1){transition-delay:.04s}
 .fab.open .fab-item:nth-child(2){transition-delay:.08s}
 .fab.open .fab-item:nth-child(3){transition-delay:.12s}
+.fab.open .fab-item:nth-child(4){transition-delay:.16s}
 .fab-item-label{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);font-size:13px;font-weight:500;padding:6px 14px;border-radius:var(--rf);border:.5px solid var(--gb);box-shadow:var(--sh2);white-space:nowrap}
 .fab-item-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);box-shadow:var(--sh2);border:.5px solid var(--gb);transition:transform .2s var(--es),box-shadow .2s var(--e)}
 .fab-item-btn:active{transform:scale(.92)}
@@ -204,7 +240,6 @@ body.no-scroll{overflow:hidden}
 .fab-item-btn{width:38px;height:38px;font-size:16px}
 .fab-item-label{font-size:12px;padding:5px 12px}
 }
-/* FAB backdrop click-to-close */
 .fab-backdrop{position:fixed;inset:0;z-index:399;display:none}
 .fab.open ~ .fab-backdrop{display:block}
 </style>
@@ -222,10 +257,23 @@ body.no-scroll{overflow:hidden}
 
 <div class="page-wrap">
 <div class="page active" id="page-photos">
+<!-- Album List View -->
+<div id="albumListView">
+<div class="album-grid" id="albumGrid"></div>
+<div class="empty" id="albumEmpty"><span class="i">🖼️</span><p>还没有相册，点击右下角 + 新建</p></div>
+</div>
+<!-- Album Photos View -->
+<div id="photosView" style="display:none">
+<div class="album-hdr">
+<button class="ah-back" id="ahBack">←</button>
+<span class="ah-title" id="ahTitle">相册</span>
+<button class="ah-del" id="ahDel">🗑</button>
+</div>
 <div class="sel-bar" id="selBar"><span class="lbl" id="selLbl">已选 0 项</span><div class="bt"><button class="cnl" onclick="toggleSelect()">取消</button><button class="del" onclick="batchDel()">删除</button></div></div>
 <div class="actions" id="actionsBar"></div>
 <div class="grid" id="photoGrid"></div>
-<div class="empty" id="emptyState"><span class="i">🖼️</span><p>还没有内容，点击添加吧</p></div>
+<div class="empty" id="emptyState"><span class="i">🖼️</span><p>还没有照片，点击右下角 + 添加</p></div>
+</div>
 </div>
 
 <div class="page" id="page-memos">
@@ -242,12 +290,22 @@ body.no-scroll{overflow:hidden}
 </div>
 </div>
 
+<!-- Viewer -->
 <div class="viewer" id="viewer">
+<div class="v-backdrop" onclick="closeViewer()"></div>
 <div class="v-top"><div><button onclick="downloadCurrent()">下载</button><button onclick="deleteCurrent()" style="margin-left:6px">删除</button></div><button onclick="closeViewer()">关闭</button></div>
 <div class="v-nav prev"><button onclick="viewerNav(-1)">‹</button></div>
 <div class="v-nav next"><button onclick="viewerNav(1)">›</button></div>
-<div class="v-wrap" id="vWrap"><img class="v-media" id="vImg" src="" alt="" draggable="false" style="display:none"><video class="v-media" id="vVideo" controls playsinline style="display:none"></video></div>
-<div class="v-info"><span id="vCount"></span><span class="v-note placeholder" id="vNote" onclick="editCurrentNote()">点击添加备注…</span><button class="v-edit" onclick="editCurrentNote()">编辑</button></div>
+<div class="v-media-wrap">
+<img class="v-media" id="vImg" src="" alt="" draggable="false" style="display:none">
+<video class="v-media" id="vVideo" controls playsinline style="display:none"></video>
+</div>
+<div class="v-notes">
+<div class="v-notes-row">
+<div class="v-note-box"><div class="vn-label">大胖小子</div><textarea class="vn-input" id="vnMe" placeholder="点击写备注…" rows="1"></textarea></div>
+<div class="v-note-box"><div class="vn-label">小瘦大子</div><textarea class="vn-input" id="vnPartner" placeholder="点击写备注…" rows="1"></textarea></div>
+</div>
+</div>
 </div>
 
 <div class="editor" id="editor"><div class="ed">
@@ -267,104 +325,430 @@ body.no-scroll{overflow:hidden}
 <div class="progress" id="progress"><span class="lbl" id="progressLabel">处理中</span><div class="bar"><div class="fill" id="progressFill" style="width:0%"></div></div></div>
 <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this.files)">
 
+<div class="fab" id="fab">
+<div class="fab-menu" id="fabMenu">
+<div class="fab-item" data-action="addPhoto"><span class="fab-item-label" id="fabLabelAdd">添加照片</span><button class="fab-item-btn">📷</button></div>
+<div class="fab-item" data-action="album"><span class="fab-item-label">新建相册</span><button class="fab-item-btn">📁</button></div>
+<div class="fab-item" data-action="memos"><span class="fab-item-label">新建备忘录</span><button class="fab-item-btn">📝</button></div>
+<div class="fab-item" data-action="recipes"><span class="fab-item-label">新建菜谱</span><button class="fab-item-btn">🍳</button></div>
+</div>
+<button class="fab-main" id="fabMain"></button>
+</div>
+<div class="fab-backdrop" id="fabBackdrop"></div>
+
 <script>
-const DB='OurAlbumDB_v5',VER=1;
-let db,currentPage='photos',selMode=false,selIds=new Set(),vList=[],vIdx=0,toastT;
+/* ========== Database (v6) ========== */
+const DB='OurAlbumDB_v6',VER=1;
+let db,currentPage='photos',selMode=false,selIds=new Set(),toastT;
+let currentAlbumId=null,currentAlbumItems=[],vList=[],vIdx=0;
 let editingId=null,editingPage=null,edImgsData=[];
 
-function openDB(){return new Promise((rv,rj)=>{const r=indexedDB.open(DB,VER);r.onupgradeneeded=e=>{const d=e.target.result;
-if(!d.objectStoreNames.contains('items')){const s=d.createObjectStore('items',{keyPath:'id',autoIncrement:true});s.createIndex('page','page',{unique:false});s.createIndex('ts','ts',{unique:false})}
+function openDB(){return new Promise((rv,rj)=>{
+let oldDB=null;
+function doOpen(){
+const r=indexedDB.open(DB,VER);
+r.onupgradeneeded=e=>{
+const d=e.target.result;
+if(!d.objectStoreNames.contains('items')){const s=d.createObjectStore('items',{keyPath:'id',autoIncrement:true});s.createIndex('album_id','album_id',{unique:false});s.createIndex('ts','ts',{unique:false})}
 if(!d.objectStoreNames.contains('notes')){const s=d.createObjectStore('notes',{keyPath:'id',autoIncrement:true});s.createIndex('page','page',{unique:false});s.createIndex('ts','ts',{unique:false})}
-};r.onsuccess=e=>{db=e.target.result;rv(db)};r.onerror=()=>rj(r.error)})}
+if(!d.objectStoreNames.contains('albums')){const s=d.createObjectStore('albums',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts',{unique:false})}
+};
+r.onsuccess=async e=>{
+db=e.target.result;
+if(oldDB){await migrateV5(oldDB);oldDB.close();indexedDB.deleteDatabase('OurAlbumDB_v5')}
+await ensureDefaultAlbum();rv(db)
+};
+r.onerror=()=>rj(r.error)
+}
+const rOld=indexedDB.open('OurAlbumDB_v5');
+rOld.onsuccess=e=>{oldDB=e.target.result;doOpen()};
+rOld.onerror=()=>doOpen()
+})}
 
-// ========== Init ==========
+async function migrateV5(old){
+const items=await getAll(old,'items');const notes=await getAll(old,'notes');
+if(items.length){
+const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
+for(const it of items){
+if(it.page==='photos'){s.add({album_id:0,type:it.type||'image',name:it.name||'',data:it.data,note_me:it.note||'',note_partner:'',ts:it.ts||Date.now()})}
+}
+await txDone(tx)
+}
+if(notes.length){
+const tx=db.transaction('notes','readwrite');const s=tx.objectStore('notes');
+for(const n of notes){s.add(n)}
+await txDone(tx)
+}
+}
+function getAll(_db,store){return new Promise(rv=>{const tx=_db.transaction(store,'readonly');tx.objectStore(store).getAll().onsuccess=e=>rv(e.target.result||[])})}
+function txDone(tx){return new Promise(rv=>{tx.oncomplete=rv;tx.onerror=rv})}
+
+async function ensureDefaultAlbum(){
+const albums=await getAlbums();
+if(!albums.find(a=>a.id===0)){
+const tx=db.transaction('albums','readwrite');
+tx.objectStore('albums').add({id:0,name:'未分类',cover:null,ts:Date.now()});
+await txDone(tx)
+}
+}
+
+/* ========== Albums ========== */
+function getAlbums(){return new Promise(rv=>{
+const tx=db.transaction('albums','readonly');
+tx.objectStore('albums').index('ts').getAll().onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>a.ts-b.ts);rv(l)}
+})}
+async function createAlbum(name){
+const tx=db.transaction('albums','readwrite');
+const id=await new Promise(rv=>{const r=tx.objectStore('albums').add({name,cover:null,ts:Date.now()});r.onsuccess=()=>rv(r.result)});
+await txDone(tx);return id
+}
+async function deleteAlbum(id){
+if(id===0)return;
+const tx1=db.transaction('items','readwrite');const s1=tx1.objectStore('items');
+const items=await new Promise(rv=>{s1.index('album_id').getAll(id).onsuccess=e=>rv(e.target.result||[])});
+for(const it of items)s1.delete(it.id);
+await txDone(tx1);
+const tx2=db.transaction('albums','readwrite');tx2.objectStore('albums').delete(id);
+await txDone(tx2)
+}
+
+/* ========== Items (Photos) ========== */
+function getItemsByAlbum(albumId){return new Promise(rv=>{
+const tx=db.transaction('items','readonly');
+tx.objectStore('items').index('album_id').getAll(albumId).onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>b.ts-a.ts);rv(l)}
+})}
+function addItem(albumId,data){return new Promise(rv=>{
+const tx=db.transaction('items','readwrite');
+const isVid=data.type&&data.type.startsWith('video/');
+const r=tx.objectStore('items').add({album_id:albumId,type:isVid?'video':'image',name:data.name,data:data.data,note_me:'',note_partner:'',ts:Date.now()});
+r.onsuccess=()=>rv(r.result);tx.oncomplete=()=>rv(r.result)
+})}
+function deleteItem(id){return new Promise(rv=>{const tx=db.transaction('items','readwrite');tx.objectStore('items').delete(id);tx.oncomplete=rv})}
+function updateItemNote(id,field,value){return new Promise(rv=>{
+const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
+s.get(id).onsuccess=e=>{const it=e.target.result;if(it){it[field==='me'?'note_me':'note_partner']=value;s.put(it)}rv()}
+})}
+
+/* ========== Init ========== */
 document.addEventListener('DOMContentLoaded',initApp);
 async function initApp(){await openDB();initSegTabs();initFab();switchPage('photos')}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
-// FAB
+/* ========== FAB ========== */
 function initFab(){
-const fab=document.getElementById('fab');
-const fabMain=document.getElementById('fabMain');
-const backdrop=document.getElementById('fabBackdrop');
+const fab=document.getElementById('fab');const fabMain=document.getElementById('fabMain');
+const backdrop=document.getElementById('fabBackdrop');const menu=document.getElementById('fabMenu');
 let open=false;
 function toggle(){open=!open;fab.classList.toggle('open',open)}
 fabMain.addEventListener('click',e=>{e.stopPropagation();toggle()});
 backdrop.addEventListener('click',()=>{open=false;fab.classList.remove('open')});
-document.querySelectorAll('.fab-item').forEach(el=>{el.addEventListener('click',()=>{
+menu.querySelectorAll('.fab-item').forEach(el=>{el.addEventListener('click',()=>{
 open=false;fab.classList.remove('open');
 const action=el.dataset.action;
-if(action==='photos'){document.getElementById('fileInput').click()}
-if(action==='memos'){openEditor('memos')}
-if(action==='recipes'){openEditor('recipes')}
+if(action==='addPhoto'){
+if(currentPage==='photos'){
+if(currentAlbumId!==null){document.getElementById('fileInput').click()}
+else{enterAlbum(0);setTimeout(()=>document.getElementById('fileInput').click(),400)}
+}
+}
+if(action==='album'){showNewAlbumModal()}
+if(action==='memos'){switchPage('memos');openEditor('memos')}
+if(action==='recipes'){switchPage('recipes');openEditor('recipes')}
 })});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){open=false;fab.classList.remove('open')}});
+updateFabMenu()
+}
+function updateFabMenu(){
+const items=document.querySelectorAll('#fabMenu .fab-item');
+if(currentPage==='photos'&&currentAlbumId!==null){
+items.forEach(el=>el.style.display=el.dataset.action==='addPhoto'?'flex':'none');
+}else if(currentPage==='photos'){
+items.forEach(el=>el.style.display=(el.dataset.action==='addPhoto'||el.dataset.action==='album')?'flex':'none');
+document.getElementById('fabLabelAdd').textContent='添加照片';
+}else{
+items.forEach(el=>el.style.display='flex');
+}
 }
 
-// ========== Page transition — pure CSS driven, no overlay, no setTimeout ==========
+/* ========== Page transitions ========== */
 function switchPage(p){
 if(currentPage===p)return;
 if(selMode)toggleSelect();closeViewer();
+if(currentPage==='photos'&&currentAlbumId!==null)exitAlbum();
 const prev=document.getElementById('page-'+currentPage);
 const next=document.getElementById('page-'+p);
 prev.classList.remove('active');
 next.classList.add('active');
 currentPage=p;
 document.querySelectorAll('#segTabs .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
-if(p==='photos')renderPhotos();
+if(p==='photos')renderAlbums();
 if(p==='memos')renderNotes('memos');
 if(p==='recipes')renderNotes('recipes');
+updateFabMenu()
 }
 
-// ========== Photos ==========
-async function getItems(page){return new Promise(r=>{const tx=db.transaction('items','readonly');tx.objectStore('items').index('page').getAll(page).onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>b.ts-a.ts);r(l)}})}
-async function renderPhotos(){
-const items=await getItems('photos');
+/* ========== Album Views ========== */
+async function renderAlbums(){
+currentAlbumId=null;
+document.getElementById('albumListView').style.display='block';
+document.getElementById('photosView').style.display='none';
+updateFabMenu();
+const albums=await getAlbums();
+const grid=document.getElementById('albumGrid');const empty=document.getElementById('albumEmpty');
+if(!albums.length){grid.innerHTML='';empty.style.display='block'}else{
+empty.style.display='none';
+let h='';
+for(const a of albums){
+const count=await new Promise(rv=>{
+const tx=db.transaction('items','readonly');
+tx.objectStore('items').index('album_id').count(a.id).onsuccess=e=>rv(e.target.result)
+});
+let cover='';
+const items=await getItemsByAlbum(a.id);
+if(items.length){const first=items[items.length-1];
+if(first.type==='image')cover=`<img class="ac-cover" src="${first.data}" alt="">`;
+else cover=`<div class="ac-empty">🎬</div>`;
+}else{cover=`<div class="ac-empty">📷</div>`}
+const delClass=a.id===0?'hidden':'';
+h+=`<div class="album-card" data-id="${a.id}" onclick="enterAlbum(${a.id})">
+${cover}
+<div class="ac-info"><div class="ac-name">${esc(a.name)}</div><div class="ac-count">${count} 张</div></div>
+<button class="ac-del ${delClass}" onclick="event.stopPropagation();delAlbum(${a.id})">×</button>
+</div>`
+}
+h+=`<button class="album-add-btn" onclick="showNewAlbumModal()">+</button>`;
+grid.innerHTML=h
+}
+}
+
+async function showNewAlbumModal(){
+showModal('新建相册','<input id="albumNameInput" placeholder="相册名称" maxlength="30"><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="albumCreateBtn">创建</button></div>');
+setTimeout(()=>document.getElementById('albumNameInput')?.focus(),150);
+document.getElementById('albumCreateBtn').addEventListener('click',async()=>{
+const name=document.getElementById('albumNameInput').value.trim();
+if(!name){toast('请输入名称');return}
+closeModal();
+const id=await createAlbum(name);
+await renderAlbums();
+enterAlbum(id)
+})
+}
+
+async function delAlbum(id){
+if(id===0)return;
+const count=await new Promise(rv=>{const tx=db.transaction('items','readonly');tx.objectStore('items').index('album_id').count(id).onsuccess=e=>rv(e.target.result)});
+if(!confirm(`删除相册及其 ${count} 张照片？`))return;
+await deleteAlbum(id);renderAlbums()
+}
+
+async function enterAlbum(id){
+currentAlbumId=id;
+document.getElementById('albumListView').style.display='none';
+document.getElementById('photosView').style.display='block';
+updateFabMenu();
+const albums=await getAlbums();const a=albums.find(x=>x.id===id);
+document.getElementById('ahTitle').textContent=a?a.name:'相册';
+document.getElementById('ahDel').classList.toggle('show',id!==0);
+renderAlbumPhotos(id)
+}
+
+function exitAlbum(){
+currentAlbumId=null;if(selMode)toggleSelect();
+document.getElementById('albumListView').style.display='block';
+document.getElementById('photosView').style.display='none';
+updateFabMenu();renderAlbums()
+}
+
+document.getElementById('ahBack').addEventListener('click',exitAlbum);
+document.getElementById('ahDel').addEventListener('click',()=>{if(currentAlbumId!==null)delAlbum(currentAlbumId)});
+
+/* ========== Album Photos Grid ========== */
+async function renderAlbumPhotos(albumId){
+const items=await getItemsByAlbum(albumId);
+currentAlbumItems=items;
 document.getElementById('actionsBar').innerHTML='<button class="pri" onclick="document.getElementById(\'fileInput\').click()">添加</button><button class="sec" onclick="toggleSelect()">选择</button><button class="dgr" onclick="pageDel()">清空</button>';
 if(!items.length){document.getElementById('photoGrid').innerHTML='';document.getElementById('emptyState').style.display='block'}else{
 document.getElementById('emptyState').style.display='none';
 let h='';
 items.forEach((it,i)=>{
 const sel=selIds.has(it.id)?' sel':'';
-const nb=it.note?`<div class="note-badge" style="display:block">${esc(it.note)}</div>`:'<div class="note-badge"></div>';
-if(it.type==='video'){h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}"><video src="${it.data}" muted preload="metadata"></video><div class="vid-badge"></div>${nb}<div class="c-acts"><button onclick="event.stopPropagation();editNote(${it.id})" title="备注">✎</button><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div></div>`}
-else{h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}"><img src="${it.data}" alt="" loading="lazy">${nb}<div class="c-acts"><button onclick="event.stopPropagation();editNote(${it.id})" title="备注">✎</button><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div></div>`}
+const nb=it.note_me||it.note_partner?`<div class="note-badge" style="display:block">${esc((it.note_me||'')+(it.note_partner?' · ':'')+(it.note_partner||''))}</div>`:'<div class="note-badge"></div>';
+if(it.type==='video'){h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}"><video src="${it.data}" muted preload="metadata"></video><div class="vid-badge"></div>${nb}<div class="c-acts"><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div></div>`}
+else{h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}"><img src="${it.data}" alt="" loading="lazy">${nb}<div class="c-acts"><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div></div>`}
 });
 document.getElementById('photoGrid').innerHTML=h;
 const cards=document.querySelectorAll('#photoGrid .card');
 cards.forEach((el,i)=>{el.style.animationDelay=Math.min(i*40,300)+'ms'});
-cards.forEach(el=>{let pt;el.addEventListener('pointerdown',e=>{pt=setTimeout(()=>{if(!selMode)toggleSelect();const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel();el.querySelector('.c-acts')?.classList.add('show')},500)});el.addEventListener('pointerup',e=>{clearTimeout(pt);if(selMode){const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel()}else{openViewer(i)}});el.addEventListener('pointerleave',()=>clearTimeout(pt));el.addEventListener('pointercancel',()=>clearTimeout(pt))})
+cards.forEach(el=>{
+let pt;el.addEventListener('pointerdown',e=>{
+pt=setTimeout(()=>{if(!selMode)toggleSelect();const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel();el.querySelector('.c-acts')?.classList.add('show')},500)
+});
+el.addEventListener('pointerup',e=>{clearTimeout(pt);const idx=items.findIndex(x=>x.id===parseInt(el.dataset.id));if(selMode){const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel()}else if(idx>=0){openViewer(idx)}});
+el.addEventListener('pointerleave',()=>clearTimeout(pt));
+el.addEventListener('pointercancel',()=>clearTimeout(pt))
+})
 }
-window._items=items;updateSel()
+updateSel()
 }
+
 function handleFiles(files){if(files&&files.length)uploadFiles(Array.from(files),0)}
 async function uploadFiles(files,i){
-if(i>=files.length){document.getElementById('progress').style.display='none';renderPhotos();toast(`已添加 ${files.length} 个文件`);return}
+if(i>=files.length){document.getElementById('progress').style.display='none';renderAlbumPhotos(currentAlbumId);toast(`已添加 ${files.length} 个文件`);updateAlbumCover();return}
 const pg=document.getElementById('progress');pg.style.display='flex';
 document.getElementById('progressFill').style.width=Math.round(i/files.length*100)+'%';
 document.getElementById('progressLabel').textContent=`${i+1}/${files.length}`;
 const f=files[i];const isVid=f.type.startsWith('video/');
-const r=new FileReader();r.onload=e=>{const tx=db.transaction('items','readwrite');tx.objectStore('items').add({page:'photos',type:isVid?'video':'image',name:f.name,data:e.target.result,note:'',ts:Date.now()});tx.oncomplete=()=>uploadFiles(files,i+1);tx.onerror=()=>uploadFiles(files,i+1)};r.readAsDataURL(f)
+const r=new FileReader();r.onload=e=>{addItem(currentAlbumId,{type:f.type,name:f.name,data:e.target.result}).then(()=>uploadFiles(files,i+1))};r.readAsDataURL(f)
+}
+async function updateAlbumCover(){
+const items=await getItemsByAlbum(currentAlbumId);
+if(items.length){
+const cover=items[items.length-1].data;
+const tx=db.transaction('albums','readwrite');
+tx.objectStore('albums').get(currentAlbumId).onsuccess=e=>{const a=e.target.result;if(a){a.cover=cover;tx.objectStore('albums').put(a)}}
+}
 }
 function toggleSelect(){selMode=!selMode;if(!selMode)selIds.clear();updateSel();document.querySelectorAll('#photoGrid .card').forEach(el=>{el.classList.toggle('sel',selMode&&selIds.has(parseInt(el.dataset.id)));if(!selMode)el.querySelector('.c-acts')?.classList.remove('show')})}
 function updateSel(){const c=selIds.size;document.getElementById('selLbl').textContent=`已选 ${c} 项`;document.getElementById('selBar').style.display=selMode?'flex':'none';document.getElementById('actionsBar').style.display=selMode?'none':'flex'}
-async function batchDel(){if(!selIds.size)return;if(!confirm(`删除 ${selIds.size} 项？`))return;const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');for(const id of selIds)s.delete(id);await new Promise(r=>{tx.oncomplete=r});selIds.clear();selMode=false;updateSel();renderPhotos();toast('已删除')}
-async function delOne(id){if(selMode)return;if(!confirm('确定删除？'))return;const tx=db.transaction('items','readwrite');tx.objectStore('items').delete(id);await new Promise(r=>{tx.oncomplete=r});closeViewer();renderPhotos();toast('已删除')}
-async function pageDel(){const items=await getItems('photos');if(!items.length)return;if(!confirm(`删除全部 ${items.length} 项？`))return;const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');for(const it of items)s.delete(it.id);await new Promise(r=>{tx.oncomplete=r});renderPhotos();toast('已清空')}
-async function editNote(id){if(selMode)return;const items=window._items||[];const it=items.find(x=>x.id===id);if(!it)return;showModal('编辑备注','<textarea id="noteInput" placeholder="写点备注…" maxlength="200">'+esc(it.note||'')+'</textarea><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" onclick="saveNote('+id+')">保存</button></div>');setTimeout(()=>document.getElementById('noteInput')?.focus(),150)}
-async function saveNote(id){const note=document.getElementById('noteInput').value.trim();const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');const it=await new Promise(r=>{s.get(id).onsuccess=e=>r(e.target.result)});if(it){it.note=note;s.put(it)}closeModal();if(document.getElementById('viewer').classList.contains('open'))updateVNote();renderPhotos();toast(note?'已保存':'已清除')}
-function openViewer(i){vList=window._items||[];vIdx=i;showVMedia();updateVNote();document.getElementById('viewer').classList.add('open');document.body.classList.add('no-scroll')}
-function showVMedia(){const it=vList[vIdx];if(!it)return;const img=document.getElementById('vImg');const vid=document.getElementById('vVideo');img.style.display='none';vid.style.display='none';vid.pause();vid.removeAttribute('src');if(it.type==='video'){vid.src=it.data;vid.style.display='block'}else{img.src=it.data;img.style.display='block'}document.getElementById('vCount').textContent=`${vIdx+1} / ${vList.length}`}
-function viewerNav(d){const n=vIdx+d;if(n>=0&&n<vList.length){vIdx=n;showVMedia();updateVNote()}}
-function closeViewer(){document.getElementById('viewer').classList.remove('open');document.body.classList.remove('no-scroll');const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src')}
-function downloadCurrent(){const it=vList[vIdx];if(it)triggerDownload(it.data,it.name||'file')}
-function deleteCurrent(){const it=vList[vIdx];if(it)delOne(it.id)}
-function editCurrentNote(){const it=vList[vIdx];if(it)editNote(it.id)}
-function updateVNote(){const it=vList[vIdx];const el=document.getElementById('vNote');if(it&&it.note){el.textContent=it.note;el.classList.remove('placeholder')}else{el.textContent='点击添加备注…';el.classList.add('placeholder')}}
-(function(){let sw=false,sx=0;const w=document.getElementById('vWrap');w.addEventListener('pointerdown',function(e){sw=true;sx=e.clientX;this.setPointerCapture(e.pointerId)});w.addEventListener('pointerup',function(e){if(!sw)return;sw=false;const dx=e.clientX-sx;if(Math.abs(dx)>60)viewerNav(dx>0?-1:1)})})();
-document.addEventListener('keydown',e=>{if(document.getElementById('viewer').classList.contains('open')){if(e.key==='Escape')closeViewer();if(e.key==='ArrowLeft')viewerNav(-1);if(e.key==='ArrowRight')viewerNav(1);return}if(e.key==='Escape'&&selMode)toggleSelect()});
+async function batchDel(){if(!selIds.size)return;if(!confirm(`删除 ${selIds.size} 项？`))return;for(const id of selIds)await deleteItem(id);selIds.clear();selMode=false;updateSel();renderAlbumPhotos(currentAlbumId);updateAlbumCover();toast('已删除')}
+async function delOne(id){if(selMode)return;if(!confirm('确定删除？'))return;await deleteItem(id);closeViewer();renderAlbumPhotos(currentAlbumId);updateAlbumCover();toast('已删除')}
+async function pageDel(){const items=await getItemsByAlbum(currentAlbumId);if(!items.length)return;if(!confirm(`删除全部 ${items.length} 项？`))return;for(const it of items)await deleteItem(it.id);renderAlbumPhotos(currentAlbumId);updateAlbumCover();toast('已清空')}
 
-// ========== Notes (Memos & Recipes) ==========
+/* ========== Viewer (with transition) ========== */
+function openViewer(index){
+const items=currentAlbumItems;
+vList=items;vIdx=index;
+const item=items[index];
+const card=document.getElementById('card-'+item.id);
+const cardRect=card?card.getBoundingClientRect():null;
+const el=item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
+const otherEl=item.type==='video'?document.getElementById('vImg'):document.getElementById('vVideo');
+
+otherEl.style.display='none';
+if(item.type==='video'){el.src=item.data;el.style.display='block';el.currentTime=0}
+else{el.src=item.data;el.style.display='block'}
+el.style.transition='none';
+el.style.transform='none';
+el.style.opacity='1';
+
+const viewer=document.getElementById('viewer');
+viewer.classList.add('open');
+document.body.classList.add('no-scroll');
+
+if(cardRect){
+const vw=window.innerWidth;const vh=window.innerHeight;
+const targetMaxW=vw*0.9;const targetMaxH=vh*0.55;
+let targetW,targetH;
+const aspect=cardRect.width/cardRect.height;
+if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){
+targetW=targetMaxW;targetH=targetW/aspect
+}else{targetH=targetMaxH;targetW=targetH*aspect}
+const scaleFromW=cardRect.width/targetW;
+const scaleFromH=cardRect.height/targetH;
+const scale=Math.min(scaleFromW,scaleFromH);
+const viewCX=vw/2;const viewCY=vh/2-20;
+const cardCX=cardRect.left+cardRect.width/2;
+const cardCY=cardRect.top+cardRect.height/2;
+const tx=cardCX-viewCX;const ty=cardCY-viewCY;
+el.style.transition='none';
+el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+requestAnimationFrame(()=>{
+requestAnimationFrame(()=>{
+el.style.transition='all .35s var(--e)';
+el.style.transform='translate(0,0) scale(1)'
+})
+})
+}
+updateVNotes()
+}
+function closeViewer(){
+const item=vList[vIdx];
+const card=item?document.getElementById('card-'+item.id):null;
+const cardRect=card?card.getBoundingClientRect():null;
+const el=item&&item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
+
+if(cardRect&&el){
+const vw=window.innerWidth;const vh=window.innerHeight;
+const targetMaxW=vw*0.9;const targetMaxH=vh*0.55;
+let targetW,targetH;
+const aspect=cardRect.width/cardRect.height;
+if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){targetW=targetMaxW;targetH=targetW/aspect}
+else{targetH=targetMaxH;targetW=targetH*aspect}
+const scaleFromW=cardRect.width/targetW;
+const scaleFromH=cardRect.height/targetH;
+const scale=Math.min(scaleFromW,scaleFromH);
+const viewCX=vw/2;const viewCY=vh/2-20;
+const cardCX=cardRect.left+cardRect.width/2;
+const cardCY=cardRect.top+cardRect.height/2;
+const tx=cardCX-viewCX;const ty=cardCY-viewCY;
+el.style.transition='all .35s var(--e)';
+el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+el.style.opacity='.4';
+setTimeout(()=>{
+document.getElementById('viewer').classList.remove('open');
+document.body.classList.remove('no-scroll');
+const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src');
+el.style.transition='none';el.style.transform='none';el.style.opacity='1'
+},350)
+}else{
+document.getElementById('viewer').classList.remove('open');
+document.body.classList.remove('no-scroll');
+const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src');
+if(el){el.style.transition='none';el.style.transform='none';el.style.opacity='1'}
+}
+}
+function viewerNav(dir){
+const n=vIdx+dir;if(n<0||n>=vList.length)return;vIdx=n;
+const item=vList[n];
+const el=item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
+const otherEl=item.type==='video'?document.getElementById('vImg'):document.getElementById('vVideo');
+otherEl.style.display='none';
+if(item.type==='video'){el.src=item.data;el.style.display='block';el.currentTime=0}
+else{el.src=item.data;el.style.display='block'}
+el.style.transition='none';el.style.transform='none';el.style.opacity='.6';
+requestAnimationFrame(()=>{el.style.transition='all .25s var(--e)';el.style.opacity='1'});
+updateVNotes()
+}
+function downloadCurrent(){const it=vList[vIdx];if(it)triggerDownload(it.data,it.name||'file')}
+async function deleteCurrent(){const it=vList[vIdx];if(it){await deleteItem(it.id);vList.splice(vIdx,1);closeViewer();renderAlbumPhotos(currentAlbumId);updateAlbumCover()}}
+
+// Viewer swipe
+(function(){
+let sw=false,sx=0;const w=document.querySelector('.v-media-wrap');
+w.addEventListener('pointerdown',function(e){sw=true;sx=e.clientX;this.setPointerCapture(e.pointerId)});
+w.addEventListener('pointerup',function(e){if(!sw)return;sw=false;const dx=e.clientX-sx;if(Math.abs(dx)>60)viewerNav(dx>0?-1:1)})
+})();
+document.addEventListener('keydown',e=>{
+if(document.getElementById('viewer').classList.contains('open')){
+if(e.key==='Escape')closeViewer();
+if(e.key==='ArrowLeft')viewerNav(-1);
+if(e.key==='ArrowRight')viewerNav(1);return
+}
+if(e.key==='Escape'&&selMode)toggleSelect()
+});
+
+// Dual notes
+let vnSaveTimer=null;
+function updateVNotes(){
+const it=vList[vIdx];
+document.getElementById('vnMe').value=it?it.note_me||'':'';
+document.getElementById('vnPartner').value=it?it.note_partner||'':''
+}
+function saveVNote(field){
+clearTimeout(vnSaveTimer);
+vnSaveTimer=setTimeout(()=>{
+const it=vList[vIdx];if(!it)return;
+const val=document.getElementById(field==='me'?'vnMe':'vnPartner').value.trim();
+updateItemNote(it.id,field,val);
+it[field==='me'?'note_me':'note_partner']=val
+},300)
+}
+document.getElementById('vnMe').addEventListener('input',()=>saveVNote('me'));
+document.getElementById('vnPartner').addEventListener('input',()=>saveVNote('partner'));
+document.getElementById('vnMe').addEventListener('blur',()=>{clearTimeout(vnSaveTimer);saveVNote('me')});
+document.getElementById('vnPartner').addEventListener('blur',()=>{clearTimeout(vnSaveTimer);saveVNote('partner')});
+
+/* ========== Notes (Memos & Recipes) ========== */
 async function getNotes(page){return new Promise(r=>{const tx=db.transaction('notes','readonly');tx.objectStore('notes').index('page').getAll(page).onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>b.ts-a.ts);r(l)}})}
 async function renderNotes(page){
 const notes=await getNotes(page);
@@ -408,13 +792,13 @@ if(editingId){data.id=editingId;s.put(data)}else{s.add(data)}
 await new Promise(r=>{tx.oncomplete=r});closeEditor();renderNotes(editingPage);toast('已保存')}
 document.getElementById('edSaveBtn').addEventListener('click',saveNoteContent);
 
-// ========== Modal ==========
+/* ========== Modal ========== */
 function showModal(title,content){document.getElementById('modalContent').innerHTML=`<h3>${title}</h3>${content}`;document.getElementById('modalOverlay').classList.add('open')}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
 document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal()});
 document.getElementById('editor').addEventListener('click',function(e){if(e.target===this)closeEditor()});
 
-// ========== Toast & Utils ==========
+/* ========== Toast & Utils ========== */
 function toast(msg,d){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(d?' danger':'');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function triggerDownload(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
@@ -422,17 +806,5 @@ function formatTs(ts){const d=new Date(ts);const now=new Date();const y=d.getFul
 document.getElementById('fileInput').addEventListener('click',function(){this.value=null});
 document.getElementById('edImgInput').addEventListener('click',function(){this.value=null});
 </script>
-
-<!-- FAB -->
-<div class="fab" id="fab">
-<div class="fab-menu">
-<div class="fab-item" data-action="photos"><span class="fab-item-label">添加照片</span><button class="fab-item-btn">📷</button></div>
-<div class="fab-item" data-action="memos"><span class="fab-item-label">新建备忘录</span><button class="fab-item-btn">📝</button></div>
-<div class="fab-item" data-action="recipes"><span class="fab-item-label">新建菜谱</span><button class="fab-item-btn">🍳</button></div>
-</div>
-<button class="fab-main" id="fabMain"></button>
-</div>
-<div class="fab-backdrop" id="fabBackdrop"></div>
-
 </body>
 </html>
