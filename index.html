@@ -358,11 +358,13 @@ db=e.target.result;
 if(oldDB){await migrateV5(oldDB);oldDB.close();indexedDB.deleteDatabase('OurAlbumDB_v5')}
 await ensureDefaultAlbum();rv(db)
 };
-r.onerror=()=>rj(r.error)
+r.onerror=()=>rj(r.error);
+r.onblocked=()=>rj(new Error('DB blocked'))
 }
 const rOld=indexedDB.open('OurAlbumDB_v5');
 rOld.onsuccess=e=>{oldDB=e.target.result;doOpen()};
-rOld.onerror=()=>doOpen()
+rOld.onerror=()=>doOpen();
+rOld.onblocked=()=>doOpen()
 })}
 
 async function migrateV5(old){
@@ -431,7 +433,7 @@ s.get(id).onsuccess=e=>{const it=e.target.result;if(it){it[field==='me'?'note_me
 
 /* ========== Init ========== */
 document.addEventListener('DOMContentLoaded',initApp);
-async function initApp(){await openDB();initSegTabs();initFab();switchPage('photos')}
+async function initApp(){initSegTabs();initFab();switchPage('photos');try{await openDB()}catch(e){toast('数据加载失败，请刷新页面',1);return};if(currentPage==='photos')renderAlbums();if(currentPage==='memos')renderNotes('memos');if(currentPage==='recipes')renderNotes('recipes')}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
 /* ========== FAB ========== */
@@ -481,10 +483,11 @@ prev.classList.remove('active');
 next.classList.add('active');
 currentPage=p;
 document.querySelectorAll('#segTabs .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+updateFabMenu();
+if(!db)return;
 if(p==='photos')renderAlbums();
 if(p==='memos')renderNotes('memos');
-if(p==='recipes')renderNotes('recipes');
-updateFabMenu()
+if(p==='recipes')renderNotes('recipes')
 }
 
 /* ========== Album Views ========== */
