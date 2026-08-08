@@ -1,4 +1,4 @@
-<!-- v9.1 -->
+<!-- v9.2 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>我们的相册</title>
 <style>
 :root{
@@ -88,7 +89,7 @@ body.no-scroll{overflow:hidden}
 
 /* ========== Photos Grid — 3D Dashboard ========== */
 .actions{display:flex;gap:8px;padding:8px 0 16px;flex-wrap:wrap}
-.actions button{padding:10px 20px;border-radius:var(--rf);border:none;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),opacity .15s var(--e)}
+.actions button{padding:10px 20px;border-radius:var(--rf);border:none;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),opacity .15s var(--e);touch-action:manipulation}
 .actions button:active{transform:scale(.96)}
 .actions .pri{background:var(--ac);color:#fff;box-shadow:0 2px 8px rgba(0,122,255,.25)}
 .actions .sec{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);border:.5px solid var(--gb)}
@@ -187,10 +188,10 @@ body.no-scroll{overflow:hidden}
 .editor .ed .ed-imgs .ed-img img{width:100%;height:100%;object-fit:cover;border-radius:var(--r)}
 .editor .ed .ed-imgs .ed-img .rm{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;border:none;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 .editor .ed .ed-btns{display:flex;gap:8px;justify-content:flex-end}
-.editor .ed .ed-btns button{padding:10px 22px;border-radius:var(--rf);border:none;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s var(--e)}
+.editor .ed .ed-btns button{padding:10px 22px;border-radius:var(--rf);border:none;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s var(--e);touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .editor .ed .ed-btns button:active{transform:scale(.96)}
 .editor .ed .ed-btns .cnl{background:var(--bg3);color:var(--tx)}
-.editor .ed .ed-btns .cfm{background:var(--ac);color:#fff;font-weight:600;touch-action:manipulation}
+.editor .ed .ed-btns .cfm{background:var(--ac);color:#fff;font-weight:600}
 .editor .ed .ed-btns .add-img{background:var(--bg3);color:var(--tx2);font-size:13px}
 
 /* Modal */
@@ -286,13 +287,13 @@ body.no-scroll{overflow:hidden}
 </div>
 
 <div class="page" id="page-memos">
-<div class="notes-actions"><button onclick="openEditor('memos')">新建备忘录</button></div>
+<div class="notes-actions"><button type="button" onclick="openEditor('memos')" style="touch-action:manipulation">新建备忘录</button></div>
 <div class="note-list" id="memoList"></div>
 <div class="empty" id="memoEmpty"><span class="i">📝</span><p>还没有备忘录，点击新建</p></div>
 </div>
 
 <div class="page" id="page-recipes">
-<div class="notes-actions"><button onclick="openEditor('recipes')">新建菜谱</button></div>
+<div class="notes-actions"><button type="button" onclick="openEditor('recipes')" style="touch-action:manipulation">新建菜谱</button></div>
 <div class="note-list" id="recipeList"></div>
 <div class="empty" id="recipeEmpty"><span class="i">🍳</span><p>还没有菜谱，点击新建</p></div>
 </div>
@@ -323,9 +324,9 @@ body.no-scroll{overflow:hidden}
 <textarea id="edBodyInput" placeholder="写点什么…"></textarea>
 <div class="ed-imgs" id="edImgs"></div>
 <div class="ed-btns">
-<button class="add-img" onclick="document.getElementById('edImgInput').click()">添加图片</button>
-<button class="cnl" onclick="closeEditor()">取消</button>
-<button class="cfm" id="edSaveBtn" type="button" onclick="saveNoteContent()">保存</button>
+<button class="add-img" type="button" onclick="document.getElementById('edImgInput').click()">添加图片</button>
+<button class="cnl" onclick="closeEditor()" type="button">取消</button>
+<button class="cfm" id="edSaveBtn" type="button" onpointerup="this.style.transform='scale(.92)';setTimeout(()=>this.style.transform='',150);saveNoteContent()" onkeydown="if(event.key==='Enter')saveNoteContent()">保存</button>
 </div></div>
 <input type="file" id="edImgInput" accept="image/*" multiple style="display:none" onchange="handleEdImgs(this.files)"></div>
 
@@ -640,15 +641,19 @@ notes.animate([{opacity:0,transform:'translateY(20px)'},{opacity:1,transform:'tr
 });
 updateVNotes()
 }
-async function closeViewer(){
-const v=document.getElementById('viewer'),bd=v.querySelector('.v-backdrop'),top=v.querySelector('.v-top'),notes=v.querySelector('.v-notes');
-await Promise.all([
-bd.animate([{opacity:1},{opacity:0}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished,
-top.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-8px)'}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished,
-notes.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(20px)'}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished
-]);
+function closeViewer(){
+var v=document.getElementById('viewer');
+if(!v||!v.classList.contains('open'))return;
+var bd=v.querySelector('.v-backdrop'),top=v.querySelector('.v-top'),notes=v.querySelector('.v-notes');
+Promise.all([
+bd.animate([{opacity:1},{opacity:0}],{duration:250,easing:'cubic-bezier(.23,1,.32,1)',fill:'forwards'}).finished,
+top.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-8px)'}],{duration:250,easing:'cubic-bezier(.23,1,.32,1)',fill:'forwards'}).finished,
+notes.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(20px)'}],{duration:250,easing:'cubic-bezier(.23,1,.32,1)',fill:'forwards'}).finished
+]).finally(function(){
 v.classList.remove('open');document.body.classList.remove('no-scroll');
-document.getElementById('vImg').src='';document.getElementById('vVideo').src=''
+var vi=document.getElementById('vImg'),vv=document.getElementById('vVideo');
+if(vi)vi.src='';if(vv)vv.src=''
+})
 }
 function viewerNav(d){if(vList.length<=1)return;vIdx=(vIdx+d+vList.length)%vList.length;showViewerItem()}
 function downloadCurrent(){const it=vList[vIdx];if(!it)return;triggerDownload(it.data,it.name||'photo')}
@@ -698,22 +703,21 @@ document.getElementById('edTitleInput').value='';document.getElementById('edBody
 if(id){const n=dataS.notes.find(n=>n.id===id);if(n){document.getElementById('edTitleInput').value=n.title||'';document.getElementById('edBodyInput').value=n.body||'';edImgsData=n.images||[];renderEdImgs()}}
 document.getElementById('editor').classList.add('open')
 }
-function closeEditor(){document.getElementById('editor').classList.remove('open');editingId=null;editingPage=null;edImgsData=[]}
+function closeEditor(){var e=document.getElementById('editor');if(e){e.classList.remove('open')}editingId=null;editingPage=null;edImgsData=[]}
 function handleEdImgs(files){if(!files||!files.length)return;Array.from(files).forEach(f=>{const r=new FileReader();r.onload=e=>{edImgsData.push(e.target.result);renderEdImgs()};r.readAsDataURL(f)})}
 function renderEdImgs(){document.getElementById('edImgs').innerHTML=edImgsData.map((d,i)=>'<div class="ed-img"><img src="'+d+'" alt=""><button class="rm" onclick="edImgsData.splice('+i+',1);renderEdImgs()">&times;</button></div>').join('')}
-async function saveNoteContent(){
-const title=document.getElementById('edTitleInput').value.trim();
-const body=document.getElementById('edBodyInput').value.trim();
-if(!title&&!body&&!edImgsData.length){toast('请输入内容');return}
-const nd={id:editingId,page:editingPage,title,body,images:edImgsData,ts:Date.now()};
-await saveNote(nd);closeEditor();renderNotes(editingPage);toast('已保存')
+function saveNoteContent(){
+var t=document.getElementById('edTitleInput').value.trim(),b=document.getElementById('edBodyInput').value.trim();
+if(!t&&!b&&!edImgsData.length){toast('请输入内容');return}
+var nd={id:editingId,page:editingPage,title:t,body:b,images:edImgsData,ts:Date.now()};
+saveNote(nd).then(function(){closeEditor();renderNotes(editingPage);toast('已保存')}).catch(function(e){toast('保存失败：'+e.message,1)})
 }
 
 /* Modal */
 function showModal(title,content){document.getElementById('modalContent').innerHTML='<h3>'+title+'</h3>'+content;document.getElementById('modalOverlay').classList.add('open')}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
 document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal()});
-document.getElementById('editor').addEventListener('click',function(e){if(e.target===this)closeEditor()});
+document.getElementById('editor').onclick=function(e){if(e.target===this)closeEditor()};
 
 /* Toast & Utils */
 function toast(msg,d){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(d?' danger':'');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
