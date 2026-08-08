@@ -360,7 +360,15 @@ function b64dec(s){const bin=atob(s.replace(/\s/g,''));const u=new Uint8Array(bi
 function b64enc(s){const u=new TextEncoder().encode(s);let r='';for(let i=0;i<u.length;i++)r+=String.fromCharCode(u[i]);return btoa(r)}
 async function gGet(path){
 let r=await fetch('https://raw.githubusercontent.com/'+REPO+'/main/'+path);
-if(r.ok){return{text:await r.text(),sha:null}}
+if(r.ok){
+  const text=await r.text();
+  let shaVal=null;
+  try{
+    const ar=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
+    if(ar.ok){const aj=await ar.json();shaVal=aj.sha}
+  }catch(e){}
+  return{text,sha:shaVal}
+}
 r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
 if(r.status===404)return null;
 if(r.status===401||r.status===403)throw Error('Token无效');
@@ -368,8 +376,9 @@ if(!r.ok)throw Error('网络错误('+r.status+')');
 const j=await r.json();return{text:b64dec(j.content),sha:j.sha}
 }
 async function gPut(path,content,shaVal,msg){
-const body=JSON.stringify({message:msg||'Update',content:b64enc(JSON.stringify(content)),sha:shaVal,branch:'main'});
-const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{method:'PUT',headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json','Content-Type':'application/json'},body});
+const body={message:msg||'Update',content:b64enc(JSON.stringify(content)),branch:'main'};
+if(shaVal)body.sha=shaVal;
+const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{method:'PUT',headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
 if(!r.ok){if(r.status===409){await loadData();return gPut(path,content,sha,msg+' (retry)')}throw Error('保存失败('+r.status+')')}
 const j=await r.json();return j.content.sha
 }
@@ -385,6 +394,12 @@ else{dataS=lcCache()||{v:8,albums:[],items:[],notes:[],lm:Date.now()};sha=null}
 function lcCache(){try{const s=localStorage.alb_cache;return s?JSON.parse(s):null}catch(e){return null}}
 async function saveData(msg){
 if(!ghToken)return;dataS.lm=Date.now();const raw=JSON.stringify(dataS);
+if(!sha){
+  try{
+    const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+DF,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
+    if(r.ok){const j=await r.json();sha=j.sha}
+  }catch(e){}
+}
 try{sha=await gPut(DF,JSON.parse(raw),sha,msg||'Update');localStorage.alb_cache=raw}catch(e){toast('同步失败：'+e.message,1)}
 }
 
