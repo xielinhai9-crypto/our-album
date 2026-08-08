@@ -2,976 +2,412 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>我们的相册</title>
 <style>
 /* ============================================
-   Macaron Glass Design System
+   Macaron × Apple Design System
    Taste-Skill + Make-Interfaces-Feel-Better
    ============================================ */
 :root {
-  font: 100%/1.5 system-ui, -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-optical-sizing: auto;
+  font:100%/1.5 system-ui,-apple-system,"SF Pro Text","Helvetica Neue",sans-serif;
+  font-optical-sizing:auto;
 
-  --bg-primary: #faf7fc;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f4eff9;
-  --text-primary: #3d3055;
-  --text-secondary: #8b7fa8;
-  --text-tertiary: #b8aed0;
-  --accent: #f7a8b8;
-  --accent-hover: #f38da3;
-  --accent2: #a8e6cf;
-  --accent3: #c4b5fd;
-  --accent4: #fdd6b2;
-  --danger: #ff6b8a;
-  --danger-bg: rgba(255,107,138,0.1);
-  --divider: rgba(61,48,85,0.08);
-  --shadow-sm: 0 1px 3px rgba(61,48,85,0.04);
-  --shadow-md: 0 4px 16px rgba(61,48,85,0.06);
-  --shadow-lg: 0 8px 32px rgba(61,48,85,0.08);
-  --glass-bg: rgba(255,255,255,0.62);
-  --glass-blur: blur(20px) saturate(160%);
-  --glass-border: rgba(61,48,85,0.05);
+  --bg:#faf7fc; --bg2:#ffffff; --bg3:#f4eff9;
+  --tx:#3d3055; --tx2:#8b7fa8; --tx3:#b8aed0;
+  --ac:#f7a8b8; --ac2:#a8e6cf; --ac3:#c4b5fd; --ac4:#fdd6b2;
+  --danger:#ff6b8a;
+  --div:rgba(61,48,85,0.08);
+  --sh:0 1px 3px rgba(61,48,85,0.04);
+  --sh2:0 4px 16px rgba(61,48,85,0.06);
+  --sh3:0 8px 32px rgba(61,48,85,0.08);
+  --g:rgba(255,255,255,0.62);
+  --gl:blur(20px) saturate(160%);
+  --gb:rgba(61,48,85,0.05);
 
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-xl: 28px;
-  --radius-full: 9999px;
+  --r:10px; --r2:16px; --r3:22px; --r4:28px; --rf:9999px;
+  --e:cubic-bezier(0.23,1,0.32,1);
+  --es:cubic-bezier(0.34,1.56,0.64,1);
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1625;--bg2:#241f33;--bg3:#2d2740;--tx:#ede8f5;--tx2:#a89cc4;--tx3:#6d6085;
+  --div:rgba(255,255,255,0.08);--sh:0 1px 3px rgba(0,0,0,0.3);--sh2:0 4px 16px rgba(0,0,0,0.4);
+  --sh3:0 8px 32px rgba(0,0,0,0.5);--g:rgba(36,31,51,0.62);--gb:rgba(255,255,255,0.06);}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
 
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body.no-scroll{overflow:hidden}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: #1a1625;
-    --bg-secondary: #241f33;
-    --bg-tertiary: #2d2740;
-    --text-primary: #ede8f5;
-    --text-secondary: #a89cc4;
-    --text-tertiary: #6d6085;
-    --divider: rgba(255,255,255,0.08);
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
-    --glass-bg: rgba(36,31,51,0.62);
-    --glass-border: rgba(255,255,255,0.06);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-}
-@media (prefers-reduced-transparency: reduce) {
-  :root { --glass-bg: var(--bg-secondary); --glass-blur: none; }
-}
-
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  min-height: 100vh; min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* ============ Ambient Orbs ============ */
-.ambient-orbs {
-  position: fixed; inset:0; pointer-events: none; z-index:0; overflow:hidden;
-}
-.orb {
-  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.28;
-  animation: orbFloat 18s ease-in-out infinite alternate;
-}
-.orb:nth-child(1) {
-  width: 360px; height: 360px; background: var(--accent);
-  top: -10%; left: -5%; animation-delay: 0s; animation-duration: 22s;
-}
-.orb:nth-child(2) {
-  width: 280px; height: 280px; background: var(--accent3);
-  top: 50%; right: -8%; animation-delay: -6s; animation-duration: 20s;
-}
-.orb:nth-child(3) {
-  width: 240px; height: 240px; background: var(--accent2);
-  bottom: -5%; left: 20%; animation-delay: -12s; animation-duration: 24s;
-}
-.orb:nth-child(4) {
-  width: 200px; height: 200px; background: var(--accent4);
-  top: 30%; left: 40%; animation-delay: -3s; animation-duration: 26s;
-}
-@keyframes orbFloat {
-  0% { transform: translate(0,0) scale(1); }
-  33% { transform: translate(40px,-30px) scale(1.1); }
-  66% { transform: translate(-20px,20px) scale(0.9); }
-  100% { transform: translate(10px,-10px) scale(1.05); }
-}
+/* ============ Orbs ============ */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.o{position:absolute;border-radius:50%;filter:blur(80px);opacity:.28;animation:oF 18s ease-in-out infinite alternate}
+.o:nth-child(1){width:360px;height:360px;background:var(--ac);top:-10%;left:-5%;animation-duration:22s}
+.o:nth-child(2){width:280px;height:280px;background:var(--ac3);top:50%;right:-8%;animation-delay:-6s;animation-duration:20s}
+.o:nth-child(3){width:240px;height:240px;background:var(--ac2);bottom:-5%;left:20%;animation-delay:-12s;animation-duration:24s}
+.o:nth-child(4){width:200px;height:200px;background:var(--ac4);top:30%;left:40%;animation-delay:-3s;animation-duration:26s}
+@keyframes oF{0%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-20px,20px) scale(.9)}to{transform:translate(10px,-10px) scale(1.05)}}
 
 /* ============ Login ============ */
-.login-wrap {
-  display:flex; align-items:center; justify-content:center;
-  min-height:100vh; min-height:100dvh; padding:var(--space-lg);
-  position:relative; z-index:1;
-}
-.login-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl) var(--space-xl);
-  width:100%; max-width:360px; text-align:center;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--glass-border);
-  animation: cardEnter 500ms var(--ease-spring);
-}
-@keyframes cardEnter {
-  from { opacity:0; transform: translateY(24px) scale(0.96); }
-  to { opacity:1; transform: translateY(0) scale(1); }
-}
-.login-card .icon { font-size:52px; margin-bottom:var(--space-md); display:block; }
-.login-card h1 {
-  font-size:28px; font-weight:700; letter-spacing:-0.02em;
-  line-height:1.1; color:var(--text-primary); margin-bottom:var(--space-xs);
-}
-.login-card .subtitle {
-  font-size:15px; color:var(--text-secondary); margin-bottom:var(--space-xl); line-height:1.4;
-}
-.login-card input {
-  width:100%; padding:14px 16px; border-radius:var(--radius-full);
-  border:1.5px solid var(--divider); background:var(--bg-tertiary);
-  color:var(--text-primary); font-size:16px; text-align:center; outline:none;
-  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-  -webkit-appearance:none;
-}
-.login-card input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(247,168,184,0.15); }
-.login-card input::placeholder { color:var(--text-tertiary); }
-.login-card button {
-  width:100%; padding:14px; border:none; border-radius:var(--radius-full);
-  background: linear-gradient(135deg, var(--accent), var(--accent3));
-  color:#fff; font-size:17px; font-weight:600; cursor:pointer;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-  letter-spacing:-0.01em; box-shadow: 0 4px 20px rgba(247,168,184,0.3);
-}
-.login-card button:active { transform:scale(0.96); }
-.login-card button:hover { opacity:0.92; box-shadow: 0 6px 28px rgba(247,168,184,0.4); }
-.login-card .error { color:var(--danger); font-size:13px; margin-top:var(--space-sm); display:none; }
-@keyframes shake {
-  0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}
-}
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:24px;position:relative;z-index:1}
+.lc{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--r4);padding:48px 32px;width:100%;max-width:360px;text-align:center;box-shadow:var(--sh3);border:1px solid var(--gb);animation:ce .5s var(--es)}
+@keyframes ce{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.lc .i{font-size:52px;margin-bottom:16px;display:block}
+.lc h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:4px}
+.lc .sub{font-size:15px;color:var(--tx2);margin-bottom:32px}
+.lc input{width:100%;padding:14px 16px;border-radius:var(--rf);border:1.5px solid var(--div);background:var(--bg3);color:var(--tx);font-size:16px;text-align:center;outline:none;transition:border-color .15s var(--e),box-shadow .15s var(--e);-webkit-appearance:none}
+.lc input:focus{border-color:var(--ac);box-shadow:0 0 0 4px rgba(247,168,184,.15)}
+.lc input::placeholder{color:var(--tx3)}
+.lc button{width:100%;padding:14px;border:none;border-radius:var(--rf);background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-size:17px;font-weight:600;cursor:pointer;transition:transform .15s var(--e),opacity .15s var(--e),box-shadow .15s var(--e);letter-spacing:-.01em;box-shadow:0 4px 20px rgba(247,168,184,.3)}
+.lc button:active{transform:scale(.96)}
+.lc .err{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+@keyframes shk{0%,to{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 
 /* ============ Main ============ */
-.main-wrap {
-  display:none; min-height:100vh; min-height:100dvh;
-  padding-bottom:calc(var(--space-2xl) + env(safe-area-inset-bottom,0px));
-  position:relative; z-index:1;
-}
+.main{display:none;min-height:100vh;min-height:100dvh;position:relative;z-index:1;padding-bottom:calc(24px + env(safe-area-inset-bottom,0))}
 
-/* ============ Header Glass ============ */
-.header {
-  position:sticky; top:0; z-index:100;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 0.5px solid var(--glass-border);
-  padding: 14px var(--space-md);
-  display:flex; align-items:center; justify-content:space-between;
-}
-.header h1 { font-size:20px; font-weight:700; letter-spacing:-0.02em; color:var(--text-primary); }
-.header .right-btns { display:flex; gap:8px; align-items:center; }
-.header button {
-  background:var(--bg-tertiary); border:none; color:var(--text-secondary);
-  padding:8px 16px; border-radius:var(--radius-full); font-size:13px; font-weight:500;
-  cursor:pointer; transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
-}
-.header button:active { transform:scale(0.95); }
-.header button.select-mode-btn { background:var(--accent); color:#fff; display:none; }
+/* Header */
+.hdr{position:sticky;top:0;z-index:100;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-bottom:.5px solid var(--gb);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.hdr button{background:var(--bg3);border:none;color:var(--tx2);padding:8px 16px;border-radius:var(--rf);font-size:13px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),background .15s var(--e)}
+.hdr button:active{transform:scale(.95)}
 
-/* ============ Tabs ============ */
-.album-tabs {
-  display:flex; gap:var(--space-sm); padding:var(--space-md) var(--space-md) 4px;
-  overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
-}
-.album-tabs::-webkit-scrollbar { display:none; }
-.album-tab {
-  flex-shrink:0; padding:10px 22px; border-radius:var(--radius-full); border:none;
-  background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-  color:var(--text-secondary); font-size:14px; font-weight:500; cursor:pointer;
-  white-space:nowrap; border:0.5px solid var(--glass-border);
-  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-}
-.album-tab:active { transform:scale(0.96); }
-.album-tab.active {
-  background: linear-gradient(135deg, var(--accent), var(--accent3));
-  color:#fff; font-weight:600; border-color:transparent;
-  box-shadow: 0 2px 12px rgba(247,168,184,0.25);
-}
-.album-tab .count { font-size:12px; margin-left:4px; opacity:0.7; }
-.album-tab.add {
-  background:transparent; border:1.5px dashed var(--text-tertiary);
-  color:var(--text-tertiary); display:flex; align-items:center; gap:4px;
-}
+/* Segmented tabs */
+.seg-wrap{padding:16px 16px 8px;display:flex;justify-content:center}
+.seg{display:flex;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--rf);padding:3px;border:.5px solid var(--gb);gap:2px}
+.seg-btn{flex:1;padding:10px 28px;border-radius:var(--rf);border:none;background:transparent;color:var(--tx2);font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .25s var(--e);position:relative;min-width:72px}
+.seg-btn.active{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-weight:600;box-shadow:0 2px 12px rgba(247,168,184,.2)}
+.seg-btn:active{transform:scale(.96)}
 
-/* ============ Actions Bar ============ */
-.actions-bar {
-  display:flex; gap:var(--space-sm); padding: var(--space-md); flex-wrap:wrap;
-}
-.actions-bar button {
-  padding:10px 20px; border-radius:var(--radius-full); border:none;
-  font-size:14px; font-weight:500; cursor:pointer;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-  display:flex; align-items:center; gap:5px;
-}
-.actions-bar button:active { transform:scale(0.96); }
-.actions-bar button.primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent3));
-  color:#fff; box-shadow:0 2px 12px rgba(247,168,184,0.2);
-}
-.actions-bar button.secondary { background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); color:var(--text-primary); border:0.5px solid var(--glass-border); }
-.actions-bar button.danger { background:var(--danger-bg); color:var(--danger); }
+/* Page container */
+.page{display:none;padding:0 16px;animation:fI .35s var(--e)}
+.page.active{display:block}
+@keyframes fI{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* ============ Selection Bar ============ */
-.selection-bar {
-  display:none; align-items:center; justify-content:space-between;
-  padding:10px var(--space-md); background:var(--glass-bg);
-  backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-  border-bottom:0.5px solid var(--glass-border);
-  animation: slideDown 250ms var(--ease-out);
-}
-@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-.selection-bar .count-label { font-size:14px; font-weight:600; color:var(--text-primary); }
-.selection-bar .actions { display:flex; gap:8px; }
-.selection-bar button {
-  padding:8px 16px; border-radius:var(--radius-full); border:none;
-  font-size:13px; font-weight:500; cursor:pointer;
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-.selection-bar button:active { transform:scale(0.95); }
-.selection-bar button.cancel { background:var(--bg-tertiary); color:var(--text-secondary); }
-.selection-bar button.delete-sel { background:var(--danger); color:#fff; }
+/* ============ Photo page ============ */
+.actions{display:flex;gap:8px;padding:8px 0 16px;flex-wrap:wrap}
+.actions button{padding:10px 20px;border-radius:var(--rf);border:none;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),opacity .15s var(--e)}
+.actions button:active{transform:scale(.96)}
+.actions .pri{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;box-shadow:0 2px 12px rgba(247,168,184,.2)}
+.actions .sec{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);border:.5px solid var(--gb)}
+.actions .dgr{background:rgba(255,107,138,.1);color:var(--danger)}
 
-/* ============ Photo Grid ============ */
-.photo-grid {
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
-  gap:var(--space-sm); padding:var(--space-md);
-}
-.photo-item {
-  position:relative; border-radius:var(--radius-md); overflow:hidden;
-  aspect-ratio:3/4; background:var(--bg-tertiary); cursor:pointer;
-  border:0.5px solid var(--divider);
-  transition: transform 250ms var(--ease-spring), box-shadow 250ms var(--ease-out);
-  animation: photoEnter 400ms var(--ease-spring) both;
-}
-@keyframes photoEnter {
-  from { opacity:0; transform:scale(0.9) translateY(12px); }
-  to { opacity:1; transform:scale(1) translateY(0); }
-}
-.photo-item:hover { transform:scale(1.03); box-shadow:0 8px 28px rgba(61,48,85,0.1); }
-.photo-item:active { transform:scale(0.97); }
-.photo-item.selected {
-  border:3px solid var(--accent);
-  box-shadow:0 0 0 4px rgba(247,168,184,0.15);
-}
-.photo-item.selected::after {
-  content:'✓'; position:absolute; top:8px; right:8px;
-  width:26px; height:26px; border-radius:50%; background:var(--accent);
-  color:#fff; display:flex; align-items:center; justify-content:center;
-  font-size:14px; font-weight:700; z-index:5; animation: popIn 200ms var(--ease-spring);
-}
-@keyframes popIn { from { transform:scale(0); } to { transform:scale(1); } }
-.photo-item img {
-  width:100%; height:100%; object-fit:cover; display:block;
-  transition: opacity 300ms var(--ease-out); opacity:0;
-}
-.photo-item img.loaded { opacity:1; }
-.photo-item .note-badge {
-  position:absolute; bottom:6px; left:6px;
-  background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  color:#fff; font-size:11px; padding:3px 8px; border-radius:var(--radius-full);
-  display:none; max-width:calc(100% - 12px); overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
-}
-.photo-item .photo-actions {
-  position:absolute; top:6px; right:6px; display:flex; gap:4px;
-  opacity:0; transition: opacity 200ms var(--ease-out);
-  z-index:3;
-}
-.photo-item:hover .photo-actions, .photo-item .photo-actions.show { opacity:1; }
-.photo-item .photo-actions button {
-  width:30px; height:30px; border-radius:50%; border:none;
-  background:rgba(0,0,0,0.45); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  color:#fff; font-size:14px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
-}
-.photo-item .photo-actions button:active { transform:scale(0.85); }
+.sel-bar{display:none;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-bottom:.5px solid var(--gb);animation:sD .25s var(--e)}
+@keyframes sD{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.sel-bar .lbl{font-size:14px;font-weight:600}
+.sel-bar .bt{display:flex;gap:8px}
+.sel-bar button{padding:8px 16px;border-radius:var(--rf);border:none;font-size:13px;font-weight:500;cursor:pointer;transition:transform .15s var(--e)}
+.sel-bar button:active{transform:scale(.95)}
+.sel-bar .cnl{background:var(--bg3);color:var(--tx2)}
+.sel-bar .del{background:var(--danger);color:#fff}
 
-/* ============ Empty State ============ */
-.empty-state {
-  text-align:center; padding:var(--space-2xl) var(--space-lg); color:var(--text-tertiary);
-  animation: fadeIn 400ms var(--ease-out);
-}
-.empty-state .icon { font-size:56px; margin-bottom:var(--space-md); opacity:0.5; display:block; }
-.empty-state p { font-size:16px; color:var(--text-secondary); }
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding-bottom:16px}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr);gap:8px;padding:0 0 16px}}
+.card{position:relative;border-radius:var(--r3);overflow:hidden;aspect-ratio:4/5;background:var(--bg3);cursor:pointer;border:.5px solid var(--div);transition:transform .25s var(--es),box-shadow .25s var(--e);animation:pe .4s var(--es) both}
+@keyframes pe{from{opacity:0;transform:scale(.9) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.card:hover{transform:scale(1.03);box-shadow:var(--sh3)}
+.card:active{transform:scale(.97)}
+.card.sel{border:3px solid var(--ac);box-shadow:0 0 0 4px rgba(247,168,184,.15)}
+.card.sel::after{content:'✓';position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:5;animation:pi .2s var(--es)}
+@keyframes pi{from{transform:scale(0)}to{transform:scale(1)}}
+.card img,.card video{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s var(--e)}
+.card img.loaded,.card video.loaded{opacity:1}
+.card .vid-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:transform .2s var(--e)}
+.card .vid-badge::after{content:'';display:block;width:0;height:0;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:3px}
+.card .note-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:11px;padding:3px 8px;border-radius:var(--rf);display:none;max-width:calc(100%-12px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.card .c-acts{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .2s var(--e);z-index:3}
+.card:hover .c-acts,.card .c-acts.show{opacity:1}
+.card .c-acts button{width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
+.card .c-acts button:active{transform:scale(.85)}
 
-/* ============ Lightbox ============ */
-.lightbox {
-  display:none; position:fixed; inset:0; z-index:200;
-  background:rgba(0,0,0,0.96); flex-direction:column;
-  animation: fadeIn 200ms var(--ease-out);
-}
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-.lightbox.open { display:flex; }
-.lightbox .top-bar {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:12px var(--space-md); padding-top:max(12px, env(safe-area-inset-top));
-  background:rgba(0,0,0,0.3); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-}
-.lightbox .top-bar .left-btns { display:flex; gap:8px; }
-.lightbox .top-bar button {
-  background:rgba(255,255,255,0.12); border:none; color:#fff;
-  padding:8px 16px; border-radius:var(--radius-full); font-size:14px; font-weight:500;
-  cursor:pointer; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
-}
-.lightbox .top-bar button:active { transform:scale(0.95); background:rgba(255,255,255,0.25); }
-.lightbox .img-wrap {
-  flex:1; display:flex; align-items:center; justify-content:center;
-  padding:var(--space-md); overflow:hidden; user-select:none; -webkit-user-select:none;
-  touch-action:pan-x;
-}
-.lightbox .img-wrap img {
-  max-width:100%; max-height:100%; object-fit:contain; border-radius:6px;
-  transition: transform 200ms var(--ease-out);
-}
-.lightbox .nav { position:absolute; top:50%; transform:translateY(-50%); }
-.lightbox .nav.prev { left:8px; } .lightbox .nav.next { right:8px; }
-.lightbox .nav button {
-  width:44px; height:44px; border-radius:50%; border:none;
-  background:rgba(255,255,255,0.12); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  color:#fff; font-size:24px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
-}
-.lightbox .nav button:active { transform:scale(0.9); background:rgba(255,255,255,0.25); }
-.lightbox .info-bar {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px var(--space-md); padding-bottom:max(10px, env(safe-area-inset-bottom));
-  background:rgba(0,0,0,0.3); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-  color:rgba(255,255,255,0.7); font-size:13px; gap:8px;
-}
-.lightbox .info-bar .note-display {
-  flex:1; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
-  color:rgba(255,255,255,0.85); cursor:pointer;
-  padding:4px 10px; border-radius:var(--radius-full); transition: background 150ms var(--ease-out);
-}
-.lightbox .info-bar .note-display:hover { background:rgba(255,255,255,0.08); }
-.lightbox .info-bar .edit-note-btn {
-  background:rgba(255,255,255,0.12); border:none; color:#fff;
-  padding:5px 12px; border-radius:var(--radius-full); font-size:12px; cursor:pointer;
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-.lightbox .info-bar .edit-note-btn:active { transform:scale(0.95); }
+.empty{text-align:center;padding:48px 24px;color:var(--tx3);animation:fI .4s var(--e)}
+.empty .i{font-size:56px;margin-bottom:16px;opacity:.5;display:block}
+.empty p{font-size:16px;color:var(--tx2)}
+
+/* ============ Blur Viewer ============ */
+.viewer{position:fixed;inset:0;z-index:200;display:none;background:rgba(0,0,0,.88);animation:fI .25s var(--e);flex-direction:column}
+.viewer.open{display:flex}
+.viewer .v-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.viewer .v-top button{background:rgba(255,255,255,.12);border:none;color:#fff;padding:8px 16px;border-radius:var(--rf);font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),background .15s var(--e)}
+.viewer .v-top button:active{transform:scale(.95);background:rgba(255,255,255,.25)}
+.viewer .v-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;touch-action:pan-x;position:relative}
+.viewer .v-wrap .v-media{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 16px 64px rgba(0,0,0,.5)}
+.viewer .v-nav{position:absolute;top:50%;transform:translateY(-50%)}
+.viewer .v-nav.prev{left:8px}.viewer .v-nav.next{right:8px}
+.viewer .v-nav button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
+.viewer .v-nav button:active{transform:scale(.9)}
+.viewer .v-info{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:rgba(255,255,255,.7);font-size:13px;gap:8px}
+.viewer .v-info .v-note{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:rgba(255,255,255,.85);cursor:pointer;padding:4px 10px;border-radius:var(--rf);transition:background .15s var(--e)}
+.viewer .v-info .v-note:hover{background:rgba(255,255,255,.08)}
+.viewer .v-info .v-note.placeholder{opacity:.4;font-style:italic}
+.viewer .v-info .v-edit{background:rgba(255,255,255,.12);border:none;color:#fff;padding:5px 12px;border-radius:var(--rf);font-size:12px;cursor:pointer;transition:transform .15s var(--e)}
+.viewer .v-info .v-edit:active{transform:scale(.95)}
+
+/* ============ Memo & Recipe pages ============ */
+.link-page{padding:16px 0;animation:fI .35s var(--e)}
+.link-card{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--r3);padding:24px;border:.5px solid var(--gb);box-shadow:var(--sh2);transition:transform .25s var(--es),box-shadow .25s var(--e);cursor:pointer;margin-bottom:12px}
+.link-card:active{transform:scale(.97)}
+.link-card h3{font-size:17px;font-weight:600;margin-bottom:4px;color:var(--tx)}
+.link-card p{font-size:14px;color:var(--tx2);margin-bottom:12px;line-height:1.5}
+.link-card .url{font-size:12px;color:var(--tx3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.link-card .link-btn{display:inline-block;margin-top:10px;padding:8px 20px;border-radius:var(--rf);background:linear-gradient(135deg,var(--ac3),var(--ac));color:#fff;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:transform .15s var(--e)}
+.link-card .link-btn:active{transform:scale(.96)}
+.link-input-group{display:flex;gap:8px;margin-bottom:12px}
+.link-input-group input{flex:1;padding:12px 16px;border-radius:var(--rf);border:1.5px solid var(--div);background:var(--bg3);color:var(--tx);font-size:15px;outline:none;transition:border-color .15s var(--e);-webkit-appearance:none}
+.link-input-group input:focus{border-color:var(--ac3)}
+.link-input-group button{padding:10px 18px;border-radius:var(--rf);border:none;background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e);white-space:nowrap}
+.link-input-group button:active{transform:scale(.96)}
 
 /* ============ Modal ============ */
-.modal-overlay {
-  display:none; position:fixed; inset:0; z-index:300;
-  background:rgba(0,0,0,0.35); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
-  align-items:center; justify-content:center; padding:var(--space-lg);
-  animation:fadeIn 200ms var(--ease-out);
-}
-.modal-overlay.open { display:flex; }
-.modal {
-  background:var(--bg-secondary); border-radius:var(--radius-xl);
-  padding:var(--space-lg); width:100%; max-width:380px;
-  box-shadow:var(--shadow-lg);
-  animation:modalEnter 350ms var(--ease-spring);
-}
-@keyframes modalEnter {
-  from{opacity:0;transform:scale(0.92) translateY(12px)}
-  to{opacity:1;transform:scale(1) translateY(0)}
-}
-.modal h3 { font-size:18px; font-weight:700; margin-bottom:var(--space-md); color:var(--text-primary); }
-.modal .modal-desc { font-size:14px; color:var(--text-secondary); margin-bottom:var(--space-md); line-height:1.5; }
-.modal input, .modal textarea {
-  width:100%; padding:13px 15px; border-radius:var(--radius-md);
-  border:1.5px solid var(--divider); background:var(--bg-tertiary);
-  color:var(--text-primary); font-size:16px; outline:none; font-family:inherit;
-  transition:border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-}
-.modal input:focus, .modal textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(247,168,184,0.12); }
-.modal textarea { resize:none; min-height:80px; line-height:1.5; }
-.modal .btns { display:flex; gap:var(--space-sm); margin-top:var(--space-md); justify-content:flex-end; }
-.modal .btns button {
-  padding:10px 22px; border-radius:var(--radius-full); border:none;
-  font-size:15px; font-weight:500; cursor:pointer;
-  transition:transform var(--duration-fast) var(--ease-out);
-}
-.modal .btns button:active { transform:scale(0.96); }
-.modal .btns button.cancel { background:var(--bg-tertiary); color:var(--text-primary); }
-.modal .btns button.confirm {
-  background:linear-gradient(135deg, var(--accent), var(--accent3));
-  color:#fff; font-weight:600;
-}
+.modal-overlay{position:fixed;inset:0;z-index:300;display:none;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;animation:fI .2s var(--e)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:var(--r4);padding:24px;width:100%;max-width:380px;box-shadow:var(--sh3);animation:me .35s var(--es)}
+@keyframes me{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal .desc{font-size:14px;color:var(--tx2);margin-bottom:16px;line-height:1.5}
+.modal input,.modal textarea{width:100%;padding:13px 15px;border-radius:var(--r2);border:1.5px solid var(--div);background:var(--bg3);color:var(--tx);font-size:16px;outline:none;font-family:inherit;transition:border-color .15s var(--e),box-shadow .15s var(--e)}
+.modal input:focus,.modal textarea:focus{border-color:var(--ac);box-shadow:0 0 0 4px rgba(247,168,184,.12)}
+.modal textarea{resize:none;min-height:80px;line-height:1.5}
+.modal .btns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.modal .btns button{padding:10px 22px;border-radius:var(--rf);border:none;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s var(--e)}
+.modal .btns button:active{transform:scale(.96)}
+.modal .btns .cnl{background:var(--bg3);color:var(--tx)}
+.modal .btns .cfm{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-weight:600}
 
-/* ============ Toast ============ */
-.toast {
-  position:fixed; top:calc(var(--space-md) + env(safe-area-inset-top,0px));
-  left:50%; transform:translateX(-50%) translateY(-130%);
-  background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-  border:0.5px solid var(--glass-border); border-radius:var(--radius-full);
-  padding:10px 22px; font-size:14px; font-weight:500; color:var(--text-primary);
-  box-shadow:var(--shadow-md); z-index:350;
-  transition:transform 350ms var(--ease-spring);
-  pointer-events:none;
-}
-.toast.show { transform:translateX(-50%) translateY(0); }
-.toast.danger { color:var(--danger); border-color:rgba(255,107,138,0.3); }
+/* Toast */
+.toast{position:fixed;top:calc(16px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%) translateY(-130%);background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border:.5px solid var(--gb);border-radius:var(--rf);padding:10px 22px;font-size:14px;font-weight:500;color:var(--tx);box-shadow:var(--sh2);z-index:350;transition:transform .35s var(--es);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.danger{color:var(--danger)}
 
-/* ============ Upload Progress ============ */
-.upload-progress {
-  position:fixed; bottom:calc(var(--space-xl) + env(safe-area-inset-bottom,0px));
-  left:50%; transform:translateX(-50%);
-  background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-  border:0.5px solid var(--glass-border); border-radius:var(--radius-full);
-  padding:12px 22px; z-index:150; display:none; align-items:center; gap:10px;
-  box-shadow:var(--shadow-md);
-}
-.upload-progress .label { font-size:13px; font-weight:500; color:var(--text-secondary); white-space:nowrap; }
-.upload-progress .bar { width:100px; height:4px; background:var(--bg-tertiary); border-radius:2px; overflow:hidden; }
-.upload-progress .bar .fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent3)); border-radius:2px; transition:width 300ms var(--ease-out); }
-
-/* ============ Responsive ============ */
-@media (max-width:480px) {
-  .photo-grid { grid-template-columns:repeat(auto-fill, minmax(105px,1fr)); gap:6px; }
-  .header h1 { font-size:18px; }
-  .album-tabs { padding:12px var(--space-md) 4px; gap:6px; }
-  .album-tab { padding:8px 16px; font-size:13px; }
-  .actions-bar { padding:var(--space-md); gap:6px; }
-  .actions-bar button { padding:8px 15px; font-size:13px; }
-  .login-card { padding:var(--space-xl) var(--space-lg); }
-  .login-card h1 { font-size:24px; }
-  .lightbox .nav button { width:38px; height:38px; font-size:20px; }
-}
+.progress{position:fixed;bottom:calc(32px+env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border:.5px solid var(--gb);border-radius:var(--rf);padding:12px 22px;z-index:150;display:none;align-items:center;gap:10px;box-shadow:var(--sh2)}
+.progress .lbl{font-size:13px;font-weight:500;color:var(--tx2);white-space:nowrap}
+.progress .bar{width:100px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.progress .bar .fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac3));border-radius:2px;transition:width .3s var(--e)}
 </style>
 </head>
 <body>
 
-<div class="ambient-orbs">
-  <div class="orb"></div><div class="orb"></div><div class="orb"></div><div class="orb"></div>
+<div class="orbs"><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div></div>
+
+<!-- Login -->
+<div class="login" id="loginWrap">
+<div class="lc">
+<span class="i">🌸</span>
+<h1>我们的相册</h1>
+<p class="sub">谢林海 &amp; 曾子珊</p>
+<input type="password" id="pwdInput" placeholder="请输入口令" autofocus autocomplete="off"><br><br>
+<button onclick="checkPwd()">进入相册</button>
+<div class="err" id="loginErr">口令错误</div>
+</div></div>
+
+<!-- Main -->
+<div class="main" id="mainWrap">
+<div class="hdr">
+<h1>我们的相册</h1>
+<button onclick="logout()">退出</button>
 </div>
 
-<div class="login-wrap" id="loginWrap">
-  <div class="login-card">
-    <span class="icon">🌸</span>
-    <h1>我们的相册</h1>
-    <p class="subtitle">属于谢林海 &amp; 曾子珊的专属记忆</p>
-    <input type="password" id="pwdInput" placeholder="请输入口令" autofocus autocomplete="off">
-    <br><br>
-    <button onclick="checkPwd()">进入相册</button>
-    <div class="error" id="loginError">口令错误，再试一次</div>
-  </div>
+<div class="seg-wrap"><div class="seg" id="segTabs">
+<button class="seg-btn active" data-page="photos">照片</button>
+<button class="seg-btn" data-page="memos">备忘录</button>
+<button class="seg-btn" data-page="recipes">菜谱</button>
+</div></div>
+
+<!-- Photos -->
+<div class="page active" id="page-photos">
+<div class="sel-bar" id="selBar"><span class="lbl" id="selLbl">已选 0 项</span><div class="bt"><button class="cnl" onclick="toggleSelect()">取消</button><button class="del" onclick="batchDel()">删除</button></div></div>
+<div class="actions" id="actionsBar"></div>
+<div class="grid" id="photoGrid"></div>
+<div class="empty" id="emptyState"><span class="i">🖼️</span><p>还没有内容，点击添加吧</p></div>
 </div>
 
-<div class="main-wrap" id="mainWrap">
-  <div class="header">
-    <h1>我们的相册</h1>
-    <div class="right-btns">
-      <button class="select-mode-btn" id="selectModeBtn" onclick="toggleSelectMode()">选择</button>
-      <button onclick="logout()">退出</button>
-    </div>
-  </div>
-  <div class="selection-bar" id="selectionBar">
-    <span class="count-label" id="selCountLabel">已选 0 张</span>
-    <div class="actions">
-      <button class="cancel" onclick="toggleSelectMode()">取消</button>
-      <button class="delete-sel" onclick="batchDelete()">删除选中</button>
-    </div>
-  </div>
-  <div class="album-tabs" id="albumTabs"></div>
-  <div class="actions-bar" id="actionsBar"></div>
-  <div class="photo-grid" id="photoGrid"></div>
-  <div class="empty-state" id="emptyState">
-    <span class="icon">🖼️</span>
-    <p>还没有照片，点击上方按钮添加吧</p>
-  </div>
+<!-- Memos -->
+<div class="page" id="page-memos">
+<div class="link-page" id="memoLinkPage">
+<div class="link-input-group">
+<input type="text" id="memoLinkInput" placeholder="粘贴 iCloud 备忘录链接…" autocomplete="off">
+<button onclick="addMemoLink()">添加</button>
+</div>
+<div id="memoLinks"></div>
+</div>
 </div>
 
-<div class="lightbox" id="lightbox">
-  <div class="top-bar">
-    <div class="left-btns">
-      <button onclick="downloadCurrentPhoto()">下载</button>
-      <button onclick="deleteCurrentPhoto()">删除</button>
-    </div>
-    <button onclick="closeLightbox()">关闭</button>
-  </div>
-  <div class="nav prev"><button onclick="lightboxNav(-1)">‹</button></div>
-  <div class="nav next"><button onclick="lightboxNav(1)">›</button></div>
-  <div class="img-wrap" id="lightboxWrap">
-    <img id="lightboxImg" src="" alt="" draggable="false">
-  </div>
-  <div class="info-bar">
-    <span id="lightboxCount"></span>
-    <span class="note-display" id="lightboxNote" onclick="editCurrentNote()">点击添加备注…</span>
-    <button class="edit-note-btn" onclick="editCurrentNote()">编辑备注</button>
-  </div>
+<!-- Recipes -->
+<div class="page" id="page-recipes">
+<div class="link-page" id="recipeLinkPage">
+<div class="link-input-group">
+<input type="text" id="recipeLinkInput" placeholder="粘贴 iCloud 菜谱链接…" autocomplete="off">
+<button onclick="addRecipeLink()">添加</button>
+</div>
+<div id="recipeLinks"></div>
+</div>
+</div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalContent"></div>
+<!-- Viewer -->
+<div class="viewer" id="viewer">
+<div class="v-top"><div><button onclick="downloadCurrent()">下载</button><button onclick="deleteCurrent()" style="margin-left:6px">删除</button></div><button onclick="closeViewer()">关闭</button></div>
+<div class="v-nav prev"><button onclick="viewerNav(-1)">‹</button></div>
+<div class="v-nav next"><button onclick="viewerNav(1)">›</button></div>
+<div class="v-wrap" id="vWrap">
+<img class="v-media" id="vImg" src="" alt="" draggable="false" style="display:none">
+<video class="v-media" id="vVideo" controls playsinline style="display:none"></video>
+</div>
+<div class="v-info">
+<span id="vCount"></span>
+<span class="v-note placeholder" id="vNote" onclick="editCurrentNote()">点击添加备注…</span>
+<button class="v-edit" onclick="editCurrentNote()">编辑</button>
+</div>
 </div>
 
-<div class="upload-progress" id="uploadProgress">
-  <span class="label" id="progressLabel">上传中</span>
-  <div class="bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
-</div>
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalContent"></div></div>
 
 <div class="toast" id="toast"></div>
-<input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+<div class="progress" id="progress"><span class="lbl" id="progressLabel">处理中</span><div class="bar"><div class="fill" id="progressFill" style="width:0%"></div></div></div>
+
+<input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this.files)">
 
 <script>
-const DB_NAME = 'OurAlbumDB_v3';
-const DB_VER = 1;
-const PASSWORD = 'wantaoxxx';
-let db = null;
-let currentAlbum = '默认相册';
-let lightboxPhotos = [];
-let lightboxIndex = 0;
-let selectMode = false;
-let selectedIds = new Set();
-let toastTimer;
+const DB='OurAlbumDB_v4',VER=1,PWD='wantaoxxx';
+let db,currentPage='photos',selMode=false,selIds=new Set(),vList=[],vIdx=0,toastT;
+const DEFAULT_MEMO_URL='https://www.icloud.com.cn/notes/0bbdoOBqW9RyfLE90oGtknyZg';
+const DEFAULT_RECIPE_URL='https://www.icloud.com.cn/notes/0bbdoOBqW9RyfLE90oGtknyZg';
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = (e) => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('photos')) {
-        const s = d.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
-        s.createIndex('album', 'album', { unique: false });
-        s.createIndex('timestamp', 'timestamp', { unique: false });
-      }
-      if (!d.objectStoreNames.contains('albums')) d.createObjectStore('albums', { keyPath: 'name' });
-    };
-    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
-    req.onerror = () => reject(req.error);
-  });
-}
-function ensureDefaultAlbum() {
-  return new Promise((resolve) => {
-    const tx = db.transaction('albums', 'readwrite');
-    const s = tx.objectStore('albums');
-    const r = s.get('默认相册');
-    r.onsuccess = () => { if (!r.result) s.put({ name: '默认相册', created: Date.now() }); resolve(); };
-  });
-}
+// ========== DB ==========
+function openDB(){return new Promise((rv,rj)=>{const r=indexedDB.open(DB,VER);r.onupgradeneeded=e=>{const d=e.target.result;
+if(!d.objectStoreNames.contains('items')){const s=d.createObjectStore('items',{keyPath:'id',autoIncrement:true});s.createIndex('page','page',{unique:false});s.createIndex('ts','ts',{unique:false});}
+if(!d.objectStoreNames.contains('links'))d.createObjectStore('links',{keyPath:'id',autoIncrement:true});
+};r.onsuccess=e=>{db=e.target.result;rv(db)};r.onerror=()=>rj(r.error)})}
+function ensureDefaults(){const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
+return Promise.resolve()}
 
-function checkPwd() {
-  const input = document.getElementById('pwdInput').value.trim();
-  if (input === PASSWORD) {
-    document.getElementById('loginWrap').style.display = 'none';
-    document.getElementById('mainWrap').style.display = 'block';
-    initApp();
-  } else {
-    const err = document.getElementById('loginError');
-    err.style.display = 'block';
-    err.style.animation = 'none'; err.offsetHeight;
-    err.style.animation = 'shake 400ms cubic-bezier(0.23, 1, 0.32, 1)';
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
-  }
-}
-document.getElementById('pwdInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPwd(); });
+// ========== Login ==========
+function checkPwd(){const v=document.getElementById('pwdInput').value.trim();if(v===PWD){document.getElementById('loginWrap').style.display='none';document.getElementById('mainWrap').style.display='block';initApp()}else{const er=document.getElementById('loginErr');er.style.display='block';er.style.animation='none';er.offsetHeight;er.style.animation='shk .4s cubic-bezier(0.23,1,0.32,1)';document.getElementById('pwdInput').value='';document.getElementById('pwdInput').focus()}}
+document.getElementById('pwdInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPwd()});
+function logout(){document.getElementById('mainWrap').style.display='none';document.getElementById('loginWrap').style.display='flex';document.getElementById('pwdInput').value='';document.getElementById('loginErr').style.display='none';if(selMode)toggleSelect();closeViewer()}
 
-function logout() {
-  document.getElementById('mainWrap').style.display = 'none';
-  document.getElementById('loginWrap').style.display = 'flex';
-  document.getElementById('pwdInput').value = '';
-  document.getElementById('loginError').style.display = 'none';
-  if (selectMode) toggleSelectMode();
-  closeLightbox();
+// ========== Init ==========
+async function initApp(){await openDB();await ensureDefaults();initSegTabs();switchPage('photos');await renderLinks()}
+function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
+
+// ========== Page Switch ==========
+function switchPage(p){if(selMode)toggleSelect();closeViewer();currentPage=p;document.querySelectorAll('#segTabs .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));const target=document.getElementById('page-'+p);if(target)target.classList.add('active');if(p==='photos')renderPhotos();if(p==='memos')renderLinks();if(p==='recipes')renderLinks()}
+
+// ========== Photos ==========
+async function getItems(page){return new Promise(r=>{const tx=db.transaction('items','readonly');tx.objectStore('items').index('page').getAll(page).onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>b.ts-a.ts);r(l)}})}
+async function renderPhotos(){
+const items=await getItems('photos');
+document.getElementById('actionsBar').innerHTML='<button class="pri" onclick="document.getElementById(\'fileInput\').click()">添加</button><button class="sec" onclick="toggleSelect()">选择</button><button class="dgr" onclick="pageDel()">清空</button>';
+if(!items.length){document.getElementById('photoGrid').innerHTML='';document.getElementById('emptyState').style.display='block'}else{
+document.getElementById('emptyState').style.display='none';
+let h='';
+items.forEach((it,i)=>{
+const sel=selIds.has(it.id)?' sel':'';
+const noteBadge=it.note?`<div class="note-badge" style="display:block">${esc(it.note)}</div>`:'<div class="note-badge"></div>';
+if(it.type==='video'){
+h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}">
+<video src="${it.data}" muted preload="metadata" onloadedmetadata="this.classList.add('loaded')" onerror="this.parentElement.remove()"></video>
+<div class="vid-badge"></div>${noteBadge}
+<div class="c-acts"><button onclick="event.stopPropagation();editNote(${it.id})" title="备注">✎</button><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div>
+</div>`;
+}else{
+h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}">
+<img src="${it.data}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="this.parentElement.remove()">${noteBadge}
+<div class="c-acts"><button onclick="event.stopPropagation();editNote(${it.id})" title="备注">✎</button><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div>
+</div>`;
+}
+});
+document.getElementById('photoGrid').innerHTML=h;
+const cards=document.querySelectorAll('#photoGrid .card');
+cards.forEach((el,i)=>{el.style.animationDelay=Math.min(i*50,400)+'ms'});
+cards.forEach(el=>{let pt;el.addEventListener('pointerdown',e=>{pt=setTimeout(()=>{if(!selMode)toggleSelect();const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel();el.querySelector('.c-acts')?.classList.add('show')},500)});el.addEventListener('pointerup',e=>{clearTimeout(pt);if(selMode){const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel()}else{openViewer(i)}});el.addEventListener('pointerleave',()=>clearTimeout(pt));el.addEventListener('pointercancel',()=>clearTimeout(pt))})
+}
+window._items=items;updateSel()
 }
 
-async function initApp() { await openDB(); await ensureDefaultAlbum(); await renderAlbums(); await renderPhotos(); }
-
-async function getAlbums() {
-  return new Promise((r) => {
-    const tx = db.transaction('albums', 'readonly');
-    tx.objectStore('albums').getAll().onsuccess = (e) => r(e.target.result || []);
-  });
-}
-async function getPhotoCount(album) {
-  return new Promise((r) => {
-    const tx = db.transaction('photos', 'readonly');
-    tx.objectStore('photos').index('album').count(album).onsuccess = (e) => r(e.target.result);
-  });
-}
-async function renderAlbums() {
-  const albums = await getAlbums();
-  const c = document.getElementById('albumTabs');
-  let html = '';
-  for (const a of albums) {
-    const cnt = await getPhotoCount(a.name);
-    html += `<div class="album-tab${a.name===currentAlbum?' active':''}" onclick="switchAlbum('${esc(a.name)}')">${esc(a.name)}<span class="count">${cnt}</span></div>`;
-  }
-  html += '<div class="album-tab add" onclick="showAddAlbum()">+ 新建</div>';
-  c.innerHTML = html;
-}
-function switchAlbum(name) {
-  if (selectMode) toggleSelectMode();
-  currentAlbum = name; renderAlbums(); renderPhotos();
+function handleFiles(files){if(files&&files.length)uploadFiles(Array.from(files),0)}
+async function uploadFiles(files,i){
+if(i>=files.length){document.getElementById('progress').style.display='none';renderPhotos();toast(`已添加 ${files.length} 个文件`);return}
+const pg=document.getElementById('progress');pg.style.display='flex';
+document.getElementById('progressFill').style.width=Math.round(i/files.length*100)+'%';
+document.getElementById('progressLabel').textContent=`处理中 ${i+1}/${files.length}`;
+const f=files[i];const isVid=f.type.startsWith('video/');
+const r=new FileReader();r.onload=e=>{
+const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
+s.add({page:'photos',type:isVid?'video':'image',name:f.name,data:e.target.result,note:'',ts:Date.now()});
+tx.oncomplete=()=>uploadFiles(files,i+1);tx.onerror=()=>uploadFiles(files,i+1)
+};r.readAsDataURL(f)
 }
 
-function showAddAlbum() {
-  showModal('新建相册',
-    '<input type="text" id="newAlbumName" placeholder="输入相册名称" maxlength="20" autocomplete="off">'+
-    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="addAlbum()">创建</button></div>');
-  setTimeout(() => document.getElementById('newAlbumName')?.focus(), 150);
-}
-async function addAlbum() {
-  const name = document.getElementById('newAlbumName').value.trim();
-  if (!name) return;
-  const tx = db.transaction('albums', 'readwrite');
-  const s = tx.objectStore('albums');
-  const ex = await new Promise(r => { s.get(name).onsuccess = (e) => r(e.target.result); });
-  if (ex) { showToast('相册已存在'); return; }
-  s.put({ name, created: Date.now() });
-  closeModal();
-  currentAlbum = name;
-  await renderAlbums(); await renderPhotos();
-}
+// ========== Select ==========
+function toggleSelect(){selMode=!selMode;if(!selMode)selIds.clear();updateSel();document.querySelectorAll('#photoGrid .card').forEach(el=>{el.classList.toggle('sel',selMode&&selIds.has(parseInt(el.dataset.id)));if(!selMode)el.querySelector('.c-acts')?.classList.remove('show')})}
+function updateSel(){const c=selIds.size;document.getElementById('selLbl').textContent=`已选 ${c} 项`;document.getElementById('selBar').style.display=selMode?'flex':'none';document.getElementById('actionsBar').style.display=selMode?'none':'flex';document.querySelector('.hdr button')!.style.display=selMode?'none':''}
+async function batchDel(){if(!selIds.size)return;if(!confirm(`删除选中的 ${selIds.size} 项？`))return;const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');for(const id of selIds)s.delete(id);await new Promise(r=>{tx.oncomplete=r});selIds.clear();selMode=false;updateSel();renderPhotos();toast('已删除')}
+async function delOne(id){if(selMode)return;if(!confirm('确定删除？'))return;const tx=db.transaction('items','readwrite');tx.objectStore('items').delete(id);await new Promise(r=>{tx.oncomplete=r});closeViewer();renderPhotos();toast('已删除')}
+async function pageDel(){const items=await getItems('photos');if(!items.length)return;if(!confirm(`删除全部 ${items.length} 项？`))return;const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');for(const it of items)s.delete(it.id);await new Promise(r=>{tx.oncomplete=r});renderPhotos();toast('已清空')}
 
-async function renameAlbum() {
-  if (currentAlbum === '默认相册') { showToast('默认相册不能重命名'); return; }
-  showModal('重命名相册',
-    `<input type="text" id="renameInput" value="${esc(currentAlbum)}" maxlength="20" autocomplete="off">`+
-    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="doRenameAlbum()">确认</button></div>');
-}
-async function doRenameAlbum() {
-  const newName = document.getElementById('renameInput').value.trim();
-  if (!newName || newName===currentAlbum) { closeModal(); return; }
-  const txP = db.transaction('photos','readwrite');
-  const pS = txP.objectStore('photos');
-  const idx = pS.index('album');
-  const photos = await new Promise(r => { idx.getAll(currentAlbum).onsuccess = (e) => r(e.target.result); });
-  for (const p of photos) { p.album = newName; pS.put(p); }
-  const txA = db.transaction('albums','readwrite');
-  const aS = txA.objectStore('albums');
-  aS.delete(currentAlbum);
-  aS.put({ name: newName, created: Date.now() });
-  currentAlbum = newName;
-  closeModal();
-  await renderAlbums(); await renderPhotos();
-}
+// ========== Note ==========
+async function editNote(id){if(selMode)return;const items=window._items||[];const it=items.find(x=>x.id===id);if(!it)return;showModal('编辑备注','<textarea id="noteInput" placeholder="写点备注…" maxlength="200">'+esc(it.note||'')+'</textarea><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" onclick="saveNote('+id+')">保存</button></div>');setTimeout(()=>document.getElementById('noteInput')?.focus(),150)}
+async function saveNote(id){const note=document.getElementById('noteInput').value.trim();const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');const it=await new Promise(r=>{s.get(id).onsuccess=e=>r(e.target.result)});if(it){it.note=note;s.put(it)}closeModal();if(document.getElementById('viewer').classList.contains('open'))updateVNote();renderPhotos();toast(note?'已保存':'已清除')}
+function editCurrentNote(){const it=vList[vIdx];if(it)editNote(it.id)}
+function updateVNote(){const it=vList[vIdx];const el=document.getElementById('vNote');if(it&&it.note){el.textContent=it.note;el.classList.remove('placeholder')}else{el.textContent='点击添加备注…';el.classList.add('placeholder')}}
 
-async function deleteAlbum() {
-  if (currentAlbum === '默认相册') { showToast('默认相册不能删除'); return; }
-  const cnt = await getPhotoCount(currentAlbum);
-  showModal('删除相册',
-    `<p class="modal-desc">确定删除「${esc(currentAlbum)}」及其 ${cnt} 张照片？</p>`+
-    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="doDeleteAlbum()" style="background:var(--danger)">删除</button></div>');
-}
-async function doDeleteAlbum() {
-  const txP = db.transaction('photos','readwrite');
-  const pS = txP.objectStore('photos');
-  const idx = pS.index('album');
-  const photos = await new Promise(r => { idx.getAll(currentAlbum).onsuccess = (e) => r(e.target.result); });
-  for (const p of photos) pS.delete(p.id);
-  const txA = db.transaction('albums','readwrite');
-  txA.objectStore('albums').delete(currentAlbum);
-  currentAlbum = '默认相册';
-  closeModal();
-  await renderAlbums(); await renderPhotos();
-}
+// ========== Viewer ==========
+function openViewer(i){vList=window._items||[];vIdx=i;showVMedia();updateVNote();document.getElementById('viewer').classList.add('open');document.body.classList.add('no-scroll')}
+function showVMedia(){const it=vList[vIdx];if(!it)return;const img=document.getElementById('vImg');const vid=document.getElementById('vVideo');img.style.display='none';vid.style.display='none';vid.pause();vid.removeAttribute('src');if(it.type==='video'){vid.src=it.data;vid.style.display='block'}else{img.src=it.data;img.style.display='block'}document.getElementById('vCount').textContent=`${vIdx+1} / ${vList.length}`}
+function viewerNav(d){const n=vIdx+d;if(n>=0&&n<vList.length){vIdx=n;showVMedia();updateVNote()}}
+function closeViewer(){document.getElementById('viewer').classList.remove('open');document.body.classList.remove('no-scroll');const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src')}
+function downloadCurrent(){const it=vList[vIdx];if(it)triggerDownload(it.data,it.name||'file')}
+function deleteCurrent(){const it=vList[vIdx];if(it)delOne(it.id)}
 
-async function getPhotos(album) {
-  return new Promise((r) => {
-    const tx = db.transaction('photos','readonly');
-    tx.objectStore('photos').index('album').getAll(album).onsuccess = (e) => {
-      const list = e.target.result || [];
-      list.sort((a,b) => b.timestamp - a.timestamp);
-      r(list);
-    };
-  });
-}
+(function(){let sw=false,sx=0;const w=document.getElementById('vWrap');w.addEventListener('pointerdown',function(e){sw=true;sx=e.clientX;this.setPointerCapture(e.pointerId)});w.addEventListener('pointerup',function(e){if(!sw)return;sw=false;const dx=e.clientX-sx;if(Math.abs(dx)>60)viewerNav(dx>0?-1:1)})})();
 
-async function renderPhotos() {
-  const photos = await getPhotos(currentAlbum);
-  document.getElementById('actionsBar').innerHTML =
-    `<button class="primary" onclick="document.getElementById('fileInput').click()">上传照片</button>`+
-    `<button class="secondary" onclick="renameAlbum()">重命名</button>`+
-    `<button class="danger" onclick="deleteAlbum()">删除相册</button>`;
-
-  if (photos.length===0) {
-    document.getElementById('photoGrid').innerHTML = '';
-    document.getElementById('emptyState').style.display = 'block';
-  } else {
-    document.getElementById('emptyState').style.display = 'none';
-    let html = '';
-    photos.forEach((p, i) => {
-      const sel = selectedIds.has(p.id) ? ' selected' : '';
-      const noteHtml = p.note ? `<div class="note-badge" style="display:block">${esc(p.note)}</div>` : '<div class="note-badge"></div>';
-      html += `<div class="photo-item${sel}" data-id="${p.id}" id="photo-${p.id}">
-        <img src="${p.data}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="this.parentElement.remove()">
-        ${noteHtml}
-        <div class="photo-actions">
-          <button onclick="event.stopPropagation();editPhotoNote(${p.id})" title="备注">✎</button>
-          <button class="del-btn" onclick="event.stopPropagation();deleteSinglePhoto(${p.id})" title="删除">×</button>
-        </div>
-      </div>`;
-    });
-    document.getElementById('photoGrid').innerHTML = html;
-
-    // stagger animation
-    const items = document.querySelectorAll('.photo-item');
-    items.forEach((el, i) => {
-      el.style.animationDelay = `${Math.min(i * 50, 400)}ms`;
-    });
-
-    // click / long-press handlers
-    items.forEach(el => {
-      let pressTimer;
-      el.addEventListener('pointerdown', (e) => {
-        pressTimer = setTimeout(() => {
-          if (!selectMode) toggleSelectMode();
-          const id = parseInt(el.dataset.id);
-          toggleSelect(id);
-          el.classList.toggle('selected', selectedIds.has(id));
-          updateSelectionUI();
-          el.querySelector('.photo-actions')?.classList.add('show');
-        }, 500);
-      });
-      el.addEventListener('pointerup', (e) => {
-        clearTimeout(pressTimer);
-        if (selectMode) {
-          const id = parseInt(el.dataset.id);
-          toggleSelect(id);
-          el.classList.toggle('selected', selectedIds.has(id));
-          updateSelectionUI();
-        } else {
-          openLightbox(i);
-        }
-      });
-      el.addEventListener('pointerleave', () => clearTimeout(pressTimer));
-      el.addEventListener('pointercancel', () => clearTimeout(pressTimer));
-    });
-  }
-  window._currentPhotos = photos;
-  updateSelectionUI();
-}
-
-function handleFiles(files) { if (files&&files.length) uploadFiles(Array.from(files),0); }
-
-async function uploadFiles(files, idx) {
-  if (idx >= files.length) {
-    document.getElementById('uploadProgress').style.display = 'none';
-    await renderAlbums(); await renderPhotos();
-    showToast(`已添加 ${files.length} 张照片`);
-    return;
-  }
-  const pg = document.getElementById('uploadProgress');
-  pg.style.display = 'flex';
-  document.getElementById('progressFill').style.width = Math.round((idx/files.length)*100)+'%';
-  document.getElementById('progressLabel').textContent = `添加中 ${idx+1}/${files.length}`;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const tx = db.transaction('photos','readwrite');
-    const s = tx.objectStore('photos');
-    s.add({ album: currentAlbum, name: files[idx].name, data: e.target.result, note: '', timestamp: Date.now() });
-    tx.oncomplete = () => uploadFiles(files, idx+1);
-    tx.onerror = () => uploadFiles(files, idx+1);
-  };
-  reader.readAsDataURL(files[idx]);
-}
-
-// ============ Select Mode ============
-function toggleSelectMode() {
-  selectMode = !selectMode;
-  if (!selectMode) selectedIds.clear();
-  updateSelectionUI();
-  document.querySelectorAll('.photo-item').forEach(el => {
-    el.classList.toggle('selected', selectMode && selectedIds.has(parseInt(el.dataset.id)));
-    if (!selectMode) el.querySelector('.photo-actions')?.classList.remove('show');
-  });
-}
-
-function toggleSelect(id) {
-  if (selectedIds.has(id)) selectedIds.delete(id);
-  else selectedIds.add(id);
-}
-
-function updateSelectionUI() {
-  const bar = document.getElementById('selectionBar');
-  const btn = document.getElementById('selectModeBtn');
-  const count = selectedIds.size;
-  document.getElementById('selCountLabel').textContent = `已选 ${count} 张`;
-  if (selectMode) {
-    bar.style.display = 'flex';
-    btn.textContent = '取消选择';
-    btn.style.display = 'inline-block';
-  } else {
-    bar.style.display = 'none';
-    btn.textContent = '选择';
-    btn.style.display = (window._currentPhotos && window._currentPhotos.length > 0) ? 'inline-block' : 'none';
-  }
-  document.getElementById('actionsBar').style.display = selectMode ? 'none' : 'flex';
-}
-
-async function batchDelete() {
-  if (selectedIds.size === 0) return;
-  if (!confirm(`确定删除选中的 ${selectedIds.size} 张照片吗？`)) return;
-  const tx = db.transaction('photos', 'readwrite');
-  const s = tx.objectStore('photos');
-  for (const id of selectedIds) s.delete(id);
-  await new Promise(r => { tx.oncomplete = r; });
-  selectedIds.clear();
-  selectMode = false;
-  updateSelectionUI();
-  await renderAlbums(); await renderPhotos();
-  showToast(`已删除选中的照片`, true);
-}
-
-async function deleteSinglePhoto(id) {
-  if (selectMode) return;
-  if (!confirm('确定删除这张照片吗？')) return;
-  const tx = db.transaction('photos', 'readwrite');
-  tx.objectStore('photos').delete(id);
-  await new Promise(r => { tx.oncomplete = r; });
-  closeLightbox();
-  await renderAlbums(); await renderPhotos();
-  showToast('照片已删除', true);
-}
-
-// ============ Note ============
-async function editPhotoNote(id) {
-  if (selectMode) return;
-  const photos = window._currentPhotos || [];
-  const p = photos.find(x => x.id === id);
-  if (!p) return;
-  showModal('编辑备注',
-    `<textarea id="noteInput" placeholder="为这张照片写点备注…" maxlength="200">${esc(p.note||'')}</textarea>`+
-    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="saveNote('+id+')">保存</button></div>');
-  setTimeout(() => document.getElementById('noteInput')?.focus(), 150);
-}
-async function saveNote(id) {
-  const note = document.getElementById('noteInput').value.trim();
-  const tx = db.transaction('photos', 'readwrite');
-  const s = tx.objectStore('photos');
-  const p = await new Promise(r => { s.get(id).onsuccess = (e) => r(e.target.result); });
-  if (p) { p.note = note; s.put(p); }
-  closeModal();
-  if (document.getElementById('lightbox').classList.contains('open')) {
-    updateLightboxNote();
-  }
-  await renderPhotos();
-  showToast(note ? '备注已保存' : '备注已清除');
-}
-
-function editCurrentNote() {
-  const p = lightboxPhotos[lightboxIndex];
-  if (p) editPhotoNote(p.id);
-}
-
-function updateLightboxNote() {
-  const p = lightboxPhotos[lightboxIndex];
-  const el = document.getElementById('lightboxNote');
-  if (p && p.note) {
-    el.textContent = p.note;
-    el.style.fontStyle = 'normal';
-  } else {
-    el.textContent = '点击添加备注…';
-    el.style.fontStyle = 'italic';
-    el.style.opacity = '0.5';
-  }
-}
-
-// ============ Lightbox ============
-function openLightbox(index) {
-  lightboxPhotos = window._currentPhotos || [];
-  lightboxIndex = index;
-  showLightboxImage();
-  updateLightboxNote();
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function showLightboxImage() {
-  const p = lightboxPhotos[lightboxIndex];
-  if (!p) return;
-  document.getElementById('lightboxImg').src = p.data;
-  document.getElementById('lightboxCount').textContent = `${lightboxIndex+1} / ${lightboxPhotos.length}`;
-}
-function lightboxNav(dir) {
-  const n = lightboxIndex+dir;
-  if (n>=0 && n<lightboxPhotos.length) { lightboxIndex=n; showLightboxImage(); updateLightboxNote(); }
-}
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
-function downloadCurrentPhoto() {
-  const p = lightboxPhotos[lightboxIndex];
-  if (p) triggerDownload(p.data, p.name||'photo.jpg');
-}
-function deleteCurrentPhoto() {
-  const p = lightboxPhotos[lightboxIndex];
-  if (p) deleteSinglePhoto(p.id);
-}
-
-// Swipe
-(function(){
-  let swiping = false, startX = 0;
-  const wrap = document.getElementById('lightboxWrap');
-  wrap.addEventListener('pointerdown', function(e) { swiping=true; startX=e.clientX; this.setPointerCapture(e.pointerId); });
-  wrap.addEventListener('pointerup', function(e) {
-    if (!swiping) return; swiping=false;
-    const dx = e.clientX - startX;
-    if (Math.abs(dx) > 60) lightboxNav(dx>0 ? -1 : 1);
-  });
-})();
-
-document.addEventListener('keydown', (e) => {
-  if (!document.getElementById('lightbox').classList.contains('open')) {
-    if (e.key === 'Escape' && selectMode) toggleSelectMode();
-    return;
-  }
-  if (e.key==='Escape') closeLightbox();
-  if (e.key==='ArrowLeft') lightboxNav(-1);
-  if (e.key==='ArrowRight') lightboxNav(1);
+document.addEventListener('keydown',e=>{
+if(document.getElementById('viewer').classList.contains('open')){if(e.key==='Escape')closeViewer();if(e.key==='ArrowLeft')viewerNav(-1);if(e.key==='ArrowRight')viewerNav(1);return}
+if(e.key==='Escape'&&selMode)toggleSelect()
 });
 
-// ============ Modal helpers ============
-function showModal(title, content) {
-  document.getElementById('modalContent').innerHTML = `<h3>${title}</h3>${content}`;
-  document.getElementById('modalOverlay').classList.add('open');
+// ========== Links (Memos / Recipes) ==========
+async function getLinks(){return new Promise(r=>{const tx=db.transaction('links','readonly');tx.objectStore('links').getAll().onsuccess=e=>{r(e.target.result||[])}})}
+async function addLink(type,url,title){const tx=db.transaction('links','readwrite');tx.objectStore('links').add({type,url,title,ts:Date.now()});await new Promise(r=>{tx.oncomplete=r});renderLinks()}
+async function delLink(id){const tx=db.transaction('links','readwrite');tx.objectStore('links').delete(id);await new Promise(r=>{tx.oncomplete=r});renderLinks()}
+async function renderLinks(){
+const links=await getLinks();
+const memos=links.filter(l=>l.type==='memo').sort((a,b)=>b.ts-a.ts);
+const recipes=links.filter(l=>l.type==='recipe').sort((a,b)=>b.ts-a.ts);
+// Memos
+let mh='';if(!memos.length){mh=`<div class="empty"><span class="i">📝</span><p>还没有备忘录链接</p></div>`}else{
+memos.forEach(l=>{mh+=`<div class="link-card" onclick="window.open('${esc(l.url)}','_blank')"><h3>${esc(l.title||'备忘录')}</h3><p class="url">${esc(l.url)}</p><button class="link-btn" onclick="event.stopPropagation();delLink(${l.id})">移除</button></div>`})}
+document.getElementById('memoLinks').innerHTML=mh;
+// Recipes
+let rh='';if(!recipes.length){
+const hasDefault=await (async()=>{const all=await getLinks();return all.some(l=>l.type==='recipe'&&l.url===DEFAULT_RECIPE_URL)})();
+if(!hasDefault){rh=`<div class="link-card" onclick="window.open('${esc(DEFAULT_RECIPE_URL)}','_blank')"><h3>🍳 我的菜谱</h3><p>点击查看 iCloud 菜谱</p><p class="url">${esc(DEFAULT_RECIPE_URL)}</p></div>`}else{rh=`<div class="empty"><span class="i">🍳</span><p>还没有菜谱链接</p></div>`}}else{
+recipes.forEach(l=>{rh+=`<div class="link-card" onclick="window.open('${esc(l.url)}','_blank')"><h3>${esc(l.title||'菜谱')}</h3><p class="url">${esc(l.url)}</p><button class="link-btn" onclick="event.stopPropagation();delLink(${l.id})">移除</button></div>`})}
+document.getElementById('recipeLinks').innerHTML=rh;
+// Auto-add default recipe if none
+if(!links.some(l=>l.type==='recipe')){await addLink('recipe',DEFAULT_RECIPE_URL,'我的菜谱')}
 }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-document.getElementById('modalOverlay').addEventListener('click', (e) => {
-  if (e.target===document.getElementById('modalOverlay')) closeModal();
-});
+function addMemoLink(){const v=document.getElementById('memoLinkInput').value.trim();if(!v)return;addLink('memo',v,'备忘录');document.getElementById('memoLinkInput').value='';toast('已添加')}
+function addRecipeLink(){const v=document.getElementById('recipeLinkInput').value.trim();if(!v)return;addLink('recipe',v,'菜谱');document.getElementById('recipeLinkInput').value='';toast('已添加')}
 
-// ============ Toast ============
-function showToast(msg, isDanger) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isDanger ? ' danger' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-}
+// ========== Modal ==========
+function showModal(title,content){document.getElementById('modalContent').innerHTML=`<h3>${title}</h3>${content}`;document.getElementById('modalOverlay').classList.add('open')}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal()});
 
-// ============ Utils ============
-function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-function triggerDownload(url, name) { const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
-document.getElementById('fileInput').addEventListener('click', function(){ this.value=null; });
+// ========== Toast ==========
+function toast(msg,d){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(d?' danger':'');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
+
+// Utils
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function triggerDownload(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
+document.getElementById('fileInput').addEventListener('click',function(){this.value=null});
 </script>
 </body>
 </html>
