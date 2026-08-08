@@ -1,4 +1,4 @@
-<!-- v8.2 -->
+<!-- v9.1 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -174,9 +174,9 @@ body.no-scroll{overflow:hidden}
 .notes-actions button:active{transform:scale(.96)}
 
 /* Editor */
-.editor{display:none;position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:16px;align-items:flex-end}
+.editor{display:none;position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:16px;align-items:flex-end;-webkit-transform:translateZ(0)}
 .editor.open{display:flex;animation:fI .25s var(--e)}
-.editor .ed{background:var(--bg2);border-radius:var(--r4) var(--r4) 0 0;width:100%;max-width:600px;margin:0 auto;padding:20px 16px;padding-bottom:max(20px,env(safe-area-inset-bottom));animation:esSlide .4s var(--sp)}
+.editor .ed{background:var(--bg2);border-radius:var(--r4) var(--r4) 0 0;width:100%;max-width:600px;margin:0 auto;padding:20px 16px;padding-bottom:max(20px,env(safe-area-inset-bottom));animation:esSlide .4s var(--sp);-webkit-transform:translateZ(0)}
 @keyframes esSlide{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .editor .ed h3{font-size:18px;font-weight:700;margin-bottom:12px}
 .editor .ed input,.editor .ed textarea{width:100%;padding:13px 15px;border-radius:var(--r2);border:1.5px solid var(--div);background:var(--bg3);color:var(--tx);font-size:16px;outline:none;font-family:inherit;margin-bottom:10px;transition:border-color .2s var(--e),box-shadow .2s var(--e)}
@@ -190,7 +190,7 @@ body.no-scroll{overflow:hidden}
 .editor .ed .ed-btns button{padding:10px 22px;border-radius:var(--rf);border:none;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s var(--e)}
 .editor .ed .ed-btns button:active{transform:scale(.96)}
 .editor .ed .ed-btns .cnl{background:var(--bg3);color:var(--tx)}
-.editor .ed .ed-btns .cfm{background:var(--ac);color:#fff;font-weight:600}
+.editor .ed .ed-btns .cfm{background:var(--ac);color:#fff;font-weight:600;touch-action:manipulation}
 .editor .ed .ed-btns .add-img{background:var(--bg3);color:var(--tx2);font-size:13px}
 
 /* Modal */
@@ -325,7 +325,7 @@ body.no-scroll{overflow:hidden}
 <div class="ed-btns">
 <button class="add-img" onclick="document.getElementById('edImgInput').click()">添加图片</button>
 <button class="cnl" onclick="closeEditor()">取消</button>
-<button class="cfm" id="edSaveBtn">保存</button>
+<button class="cfm" id="edSaveBtn" type="button" onclick="saveNoteContent()">保存</button>
 </div></div>
 <input type="file" id="edImgInput" accept="image/*" multiple style="display:none" onchange="handleEdImgs(this.files)"></div>
 
@@ -708,7 +708,6 @@ if(!title&&!body&&!edImgsData.length){toast('请输入内容');return}
 const nd={id:editingId,page:editingPage,title,body,images:edImgsData,ts:Date.now()};
 await saveNote(nd);closeEditor();renderNotes(editingPage);toast('已保存')
 }
-document.getElementById('edSaveBtn').addEventListener('click',saveNoteContent);
 
 /* Modal */
 function showModal(title,content){document.getElementById('modalContent').innerHTML='<h3>'+title+'</h3>'+content;document.getElementById('modalOverlay').classList.add('open')}
