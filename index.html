@@ -64,11 +64,6 @@ body.no-scroll{overflow:hidden}
 .album-card .ac-info{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff}
 .album-card .ac-info .ac-name{font-size:15px;font-weight:600;margin-bottom:2px}
 .album-card .ac-info .ac-count{font-size:12px;opacity:.75}
-.album-card .ac-btns{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .2s var(--e);z-index:2}
-.album-card:hover .ac-btns{opacity:1}
-.album-card .ac-btns.hidden{display:none}
-.album-card .ac-btns button{width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
-.album-card .ac-btns button:active{transform:scale(.85)}
 .album-add-btn{aspect-ratio:4/3;border-radius:var(--r3);border:2px dashed var(--div);background:transparent;color:var(--tx3);font-size:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s var(--e)}
 .album-add-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(247,168,184,.06)}
 
@@ -77,10 +72,11 @@ body.no-scroll{overflow:hidden}
 .album-hdr .ah-back{width:36px;height:36px;border-radius:50%;border:none;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--e);flex-shrink:0}
 .album-hdr .ah-back:active{transform:scale(.9)}
 .album-hdr .ah-title{flex:1;font-size:17px;font-weight:600;text-align:center}
-.album-hdr .ah-del{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,107,138,.1);color:var(--danger);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:transform .2s var(--e);flex-shrink:0}
-.album-hdr .ah-del.show{display:flex}
-.album-hdr .ah-del:active{transform:scale(.9)}
-.album-hdr .ah-spacer{width:36px;height:36px;flex-shrink:0}
+.album-hdr .ah-acts{display:flex;gap:6px;flex-shrink:0}
+.album-hdr .ah-acts button{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:transform .2s var(--e);flex-shrink:0}
+.album-hdr .ah-acts button:active{transform:scale(.9)}
+.album-hdr .ah-edit{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx2);border:.5px solid var(--gb)}
+.album-hdr .ah-del{background:rgba(255,107,138,.1);color:var(--danger)}
 
 /* ========== Photos Grid — 3D Dashboard ========== */
 .actions{display:flex;gap:8px;padding:8px 0 16px;flex-wrap:wrap}
@@ -268,7 +264,10 @@ body.no-scroll{overflow:hidden}
 <div class="album-hdr">
 <button class="ah-back" id="ahBack">←</button>
 <span class="ah-title" id="ahTitle">相册</span>
+<div class="ah-acts">
+<button class="ah-edit" id="ahEdit">✎</button>
 <button class="ah-del" id="ahDel">🗑</button>
+</div>
 </div>
 <div class="sel-bar" id="selBar"><span class="lbl" id="selLbl">已选 0 项</span><div class="bt"><button class="cnl" onclick="toggleSelect()">取消</button><button class="del" onclick="batchDel()">删除</button></div></div>
 <div class="actions" id="actionsBar"></div>
@@ -517,15 +516,9 @@ if(items.length){const first=items[items.length-1];
 if(first.type==='image')cover=`<img class="ac-cover" src="${first.data}" alt="">`;
 else cover=`<div class="ac-empty">🎬</div>`;
 }else{cover=`<div class="ac-empty">📷</div>`}
-const delClass=a.id===0?'hidden':'';
-const edName=esc(a.name).replace(/'/g,"&#39;").replace(/"/g,'&quot;');
 h+=`<div class="album-card" data-id="${a.id}" onclick="enterAlbum(${a.id})">
 ${cover}
 <div class="ac-info"><div class="ac-name">${esc(a.name)}</div><div class="ac-count">${count} 张</div></div>
-<div class="ac-btns ${delClass}">
-<button class="ac-edit" onclick="event.stopPropagation();showEditAlbumModal(${a.id},'${edName}')">✎</button>
-<button class="ac-del" onclick="event.stopPropagation();delAlbum(${a.id})">×</button>
-</div>
 </div>`
 }
 h+=`<button class="album-add-btn" onclick="showNewAlbumModal()">+</button>`;
@@ -577,7 +570,8 @@ document.getElementById('photosView').style.display='block';
 updateFabMenu();
 const albums=await getAlbums();const a=albums.find(x=>x.id===id);
 document.getElementById('ahTitle').textContent=a?a.name:'相册';
-document.getElementById('ahDel').classList.toggle('show',id!==0);
+document.getElementById('ahDel').style.display=id===0?'none':'';
+document.getElementById('ahEdit').onclick=()=>showEditAlbumModal(id,a?a.name:'未分类');
 renderAlbumPhotos(id)
 }
 
