@@ -51,23 +51,10 @@ body.no-scroll{overflow:hidden}
 .o:nth-child(4){width:200px;height:200px;background:var(--ac4);top:30%;left:40%;animation-delay:-3s;animation-duration:26s}
 @keyframes oF{0%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-20px,20px) scale(.9)}to{transform:translate(10px,-10px) scale(1.05)}}
 
-/* ============ Login ============ */
-.login{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:24px;position:relative;z-index:1}
-.lc{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--r4);padding:48px 32px;width:100%;max-width:360px;text-align:center;box-shadow:var(--sh3);border:1px solid var(--gb);animation:ce .5s var(--es)}
-@keyframes ce{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-.lc .i{font-size:52px;margin-bottom:16px;display:block}
-.lc h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:4px}
-.lc .sub{font-size:15px;color:var(--tx2);margin-bottom:32px}
-.lc input{width:100%;padding:14px 16px;border-radius:var(--rf);border:1.5px solid var(--div);background:var(--bg3);color:var(--tx);font-size:16px;text-align:center;outline:none;transition:border-color .15s var(--e),box-shadow .15s var(--e);-webkit-appearance:none}
-.lc input:focus{border-color:var(--ac);box-shadow:0 0 0 4px rgba(247,168,184,.15)}
-.lc input::placeholder{color:var(--tx3)}
-.lc button{width:100%;padding:14px;border:none;border-radius:var(--rf);background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-size:17px;font-weight:600;cursor:pointer;transition:transform .15s var(--e),opacity .15s var(--e),box-shadow .15s var(--e);letter-spacing:-.01em;box-shadow:0 4px 20px rgba(247,168,184,.3)}
-.lc button:active{transform:scale(.96)}
-.lc .err{color:var(--danger);font-size:13px;margin-top:8px;display:none}
-@keyframes shk{0%,to{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
 
 /* ============ Main ============ */
-.main{display:none;min-height:100vh;min-height:100dvh;position:relative;z-index:1;padding-bottom:calc(24px + env(safe-area-inset-bottom,0))}
+.main{min-height:100vh;min-height:100dvh;position:relative;z-index:1;padding-bottom:calc(24px + env(safe-area-inset-bottom,0))}
 
 /* Header */
 .hdr{position:sticky;top:0;z-index:100;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-bottom:.5px solid var(--gb);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -193,22 +180,10 @@ body.no-scroll{overflow:hidden}
 
 <div class="orbs"><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div></div>
 
-<!-- Login -->
-<div class="login" id="loginWrap">
-<div class="lc">
-<span class="i">🌸</span>
-<h1>我们的相册</h1>
-<p class="sub">谢林海 &amp; 曾子珊</p>
-<input type="password" id="pwdInput" placeholder="请输入口令" autofocus autocomplete="off"><br><br>
-<button onclick="checkPwd()">进入相册</button>
-<div class="err" id="loginErr">口令错误</div>
-</div></div>
-
 <!-- Main -->
 <div class="main" id="mainWrap">
 <div class="hdr">
 <h1>我们的相册</h1>
-<button onclick="logout()">退出</button>
 </div>
 
 <div class="seg-wrap"><div class="seg" id="segTabs">
@@ -273,7 +248,7 @@ body.no-scroll{overflow:hidden}
 <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this.files)">
 
 <script>
-const DB='OurAlbumDB_v4',VER=1,PWD='wantaoxxx';
+const DB='OurAlbumDB_v4',VER=1;
 let db,currentPage='photos',selMode=false,selIds=new Set(),vList=[],vIdx=0,toastT;
 const DEFAULT_MEMO_URL='https://www.icloud.com.cn/notes/0bbdoOBqW9RyfLE90oGtknyZg';
 const DEFAULT_RECIPE_URL='https://www.icloud.com.cn/notes/0bbdoOBqW9RyfLE90oGtknyZg';
@@ -286,12 +261,8 @@ if(!d.objectStoreNames.contains('links'))d.createObjectStore('links',{keyPath:'i
 function ensureDefaults(){const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
 return Promise.resolve()}
 
-// ========== Login ==========
-function checkPwd(){const v=document.getElementById('pwdInput').value.trim();if(v===PWD){document.getElementById('loginWrap').style.display='none';document.getElementById('mainWrap').style.display='block';initApp()}else{const er=document.getElementById('loginErr');er.style.display='block';er.style.animation='none';er.offsetHeight;er.style.animation='shk .4s cubic-bezier(0.23,1,0.32,1)';document.getElementById('pwdInput').value='';document.getElementById('pwdInput').focus()}}
-document.getElementById('pwdInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPwd()});
-function logout(){document.getElementById('mainWrap').style.display='none';document.getElementById('loginWrap').style.display='flex';document.getElementById('pwdInput').value='';document.getElementById('loginErr').style.display='none';if(selMode)toggleSelect();closeViewer()}
-
 // ========== Init ==========
+document.addEventListener('DOMContentLoaded',initApp);
 async function initApp(){await openDB();await ensureDefaults();initSegTabs();switchPage('photos');await renderLinks()}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
@@ -346,7 +317,7 @@ tx.oncomplete=()=>uploadFiles(files,i+1);tx.onerror=()=>uploadFiles(files,i+1)
 
 // ========== Select ==========
 function toggleSelect(){selMode=!selMode;if(!selMode)selIds.clear();updateSel();document.querySelectorAll('#photoGrid .card').forEach(el=>{el.classList.toggle('sel',selMode&&selIds.has(parseInt(el.dataset.id)));if(!selMode)el.querySelector('.c-acts')?.classList.remove('show')})}
-function updateSel(){const c=selIds.size;document.getElementById('selLbl').textContent=`已选 ${c} 项`;document.getElementById('selBar').style.display=selMode?'flex':'none';document.getElementById('actionsBar').style.display=selMode?'none':'flex';document.querySelector('.hdr button')!.style.display=selMode?'none':''}
+function updateSel(){const c=selIds.size;document.getElementById('selLbl').textContent=`已选 ${c} 项`;document.getElementById('selBar').style.display=selMode?'flex':'none';document.getElementById('actionsBar').style.display=selMode?'none':'flex'}
 async function batchDel(){if(!selIds.size)return;if(!confirm(`删除选中的 ${selIds.size} 项？`))return;const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');for(const id of selIds)s.delete(id);await new Promise(r=>{tx.oncomplete=r});selIds.clear();selMode=false;updateSel();renderPhotos();toast('已删除')}
 async function delOne(id){if(selMode)return;if(!confirm('确定删除？'))return;const tx=db.transaction('items','readwrite');tx.objectStore('items').delete(id);await new Promise(r=>{tx.oncomplete=r});closeViewer();renderPhotos();toast('已删除')}
 async function pageDel(){const items=await getItems('photos');if(!items.length)return;if(!confirm(`删除全部 ${items.length} 项？`))return;const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');for(const it of items)s.delete(it.id);await new Promise(r=>{tx.oncomplete=r});renderPhotos();toast('已清空')}
