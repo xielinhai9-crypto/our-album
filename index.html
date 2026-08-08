@@ -127,7 +127,7 @@ body.no-scroll{overflow:hidden}
 .v-top button{background:rgba(255,255,255,.12);border:none;color:#fff;padding:8px 16px;border-radius:var(--rf);font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),background .15s var(--e)}
 .v-top button:active{transform:scale(.95);background:rgba(255,255,255,.25)}
 .v-media-wrap{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;flex:1;min-height:0;touch-action:pan-x;padding-top:60px}
-.v-media{max-width:90vw;max-height:55vh;object-fit:contain;border-radius:12px;box-shadow:0 16px 64px rgba(0,0,0,.5);transition:all .35s var(--e)}
+.v-media{max-width:90vw;max-height:55vh;object-fit:contain;border-radius:12px;box-shadow:0 16px 64px rgba(0,0,0,.5);will-change:transform,opacity}
 .v-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:5}
 .v-nav.prev{left:8px}.v-nav.next{right:8px}
 .v-nav button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
@@ -650,38 +650,24 @@ const otherEl=item.type==='video'?document.getElementById('vImg'):document.getEl
 otherEl.style.display='none';
 if(item.type==='video'){el.src=item.data;el.style.display='block';el.currentTime=0}
 else{el.src=item.data;el.style.display='block'}
-el.style.transition='none';
-el.style.transform='none';
-el.style.opacity='1';
-
+el.style.transform='';el.style.opacity='';el.style.willChange='transform,opacity';
 const viewer=document.getElementById('viewer');
 viewer.classList.add('open');
 document.body.classList.add('no-scroll');
-
+document.querySelector('.v-backdrop').animate([{opacity:0},{opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'});
+document.querySelector('.v-top').animate([{opacity:0},{opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'});
 if(cardRect){
 const vw=window.innerWidth;const vh=window.innerHeight;
 const targetMaxW=vw*0.9;const targetMaxH=vh*0.55;
 let targetW,targetH;
 const aspect=cardRect.width/cardRect.height;
-if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){
-targetW=targetMaxW;targetH=targetW/aspect
-}else{targetH=targetMaxH;targetW=targetH*aspect}
-const scaleFromW=cardRect.width/targetW;
-const scaleFromH=cardRect.height/targetH;
-const scale=Math.min(scaleFromW,scaleFromH);
-const viewCX=vw/2;const viewCY=vh/2-20;
-const cardCX=cardRect.left+cardRect.width/2;
-const cardCY=cardRect.top+cardRect.height/2;
-const tx=cardCX-viewCX;const ty=cardCY-viewCY;
-el.style.transition='none';
-el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
-requestAnimationFrame(()=>{
-requestAnimationFrame(()=>{
-el.style.transition='all .35s var(--e)';
-el.style.transform='translate(0,0) scale(1)'
-})
-})
-}
+if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){targetW=targetMaxW;targetH=targetW/aspect}
+else{targetH=targetMaxH;targetW=targetH*aspect}
+const scale=Math.min(cardRect.width/targetW,cardRect.height/targetH);
+const tx=(cardRect.left+cardRect.width/2)-(vw/2);
+const ty=(cardRect.top+cardRect.height/2)-(vh/2-20);
+el.animate([{transform:`translate(${tx}px,${ty}px) scale(${scale})`,opacity:.85},{transform:'translate(0,0) scale(1)',opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'})
+}else{el.animate([{opacity:.7},{opacity:1}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'})}
 updateVNotes()
 }
 function closeViewer(){
@@ -689,7 +675,17 @@ const item=vList[vIdx];
 const card=item?document.getElementById('card-'+item.id):null;
 const cardRect=card?card.getBoundingClientRect():null;
 const el=item&&item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
-
+const finish=()=>{
+document.getElementById('viewer').classList.remove('open');
+document.body.classList.remove('no-scroll');
+const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src');
+if(el){el.style.transform='';el.style.opacity='';el.style.willChange='auto'}
+document.querySelector('.v-backdrop').style.opacity='';
+document.querySelector('.v-top').style.opacity='';
+};
+const promises=[];
+promises.push(document.querySelector('.v-backdrop').animate([{opacity:1},{opacity:0}],{duration:280,easing:'cubic-bezier(0.55,0,1,0.45)',fill:'forwards'}).finished);
+promises.push(document.querySelector('.v-top').animate([{opacity:1},{opacity:0}],{duration:280,easing:'cubic-bezier(0.55,0,1,0.45)',fill:'forwards'}).finished);
 if(cardRect&&el){
 const vw=window.innerWidth;const vh=window.innerHeight;
 const targetMaxW=vw*0.9;const targetMaxH=vh*0.55;
@@ -697,28 +693,12 @@ let targetW,targetH;
 const aspect=cardRect.width/cardRect.height;
 if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){targetW=targetMaxW;targetH=targetW/aspect}
 else{targetH=targetMaxH;targetW=targetH*aspect}
-const scaleFromW=cardRect.width/targetW;
-const scaleFromH=cardRect.height/targetH;
-const scale=Math.min(scaleFromW,scaleFromH);
-const viewCX=vw/2;const viewCY=vh/2-20;
-const cardCX=cardRect.left+cardRect.width/2;
-const cardCY=cardRect.top+cardRect.height/2;
-const tx=cardCX-viewCX;const ty=cardCY-viewCY;
-el.style.transition='all .35s var(--e)';
-el.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
-el.style.opacity='.4';
-setTimeout(()=>{
-document.getElementById('viewer').classList.remove('open');
-document.body.classList.remove('no-scroll');
-const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src');
-el.style.transition='none';el.style.transform='none';el.style.opacity='1'
-},350)
-}else{
-document.getElementById('viewer').classList.remove('open');
-document.body.classList.remove('no-scroll');
-const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src');
-if(el){el.style.transition='none';el.style.transform='none';el.style.opacity='1'}
+const scale=Math.min(cardRect.width/targetW,cardRect.height/targetH);
+const tx=(cardRect.left+cardRect.width/2)-(vw/2);
+const ty=(cardRect.top+cardRect.height/2)-(vh/2-20);
+promises.push(el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${tx}px,${ty}px) scale(${scale})`,opacity:.4}],{duration:300,easing:'cubic-bezier(0.55,0,1,0.45)',fill:'forwards'}).finished)
 }
+Promise.all(promises).then(finish).catch(finish)
 }
 function viewerNav(dir){
 const n=vIdx+dir;if(n<0||n>=vList.length)return;vIdx=n;
@@ -728,8 +708,8 @@ const otherEl=item.type==='video'?document.getElementById('vImg'):document.getEl
 otherEl.style.display='none';
 if(item.type==='video'){el.src=item.data;el.style.display='block';el.currentTime=0}
 else{el.src=item.data;el.style.display='block'}
-el.style.transition='none';el.style.transform='none';el.style.opacity='.6';
-requestAnimationFrame(()=>{el.style.transition='all .25s var(--e)';el.style.opacity='1'});
+el.style.transform='';el.style.willChange='transform,opacity';
+el.animate([{opacity:.6},{opacity:1}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'});
 updateVNotes()
 }
 function downloadCurrent(){const it=vList[vIdx];if(it)triggerDownload(it.data,it.name||'file')}
