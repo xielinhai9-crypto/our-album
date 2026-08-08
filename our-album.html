@@ -8,30 +8,33 @@
 <title>我们的相册</title>
 <style>
 /* ============================================
-   Apple Design System — Foundations
+   Macaron Glass Design System
+   Taste-Skill + Make-Interfaces-Feel-Better
    ============================================ */
-
 :root {
   font: 100%/1.5 system-ui, -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
   font-optical-sizing: auto;
 
-  --bg-primary: #f5f5f7;
+  --bg-primary: #faf7fc;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #f0f0f2;
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-tertiary: #aeaeb2;
-  --accent: #ff6b8a;
-  --accent-bg: rgba(255,107,138,0.08);
-  --danger: #ff3b30;
-  --danger-bg: rgba(255,59,48,0.08);
-  --divider: rgba(0,0,0,0.08);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
-  --glass-bg: rgba(255,255,255,0.72);
-  --glass-blur: blur(24px) saturate(180%);
-  --glass-border: rgba(0,0,0,0.06);
+  --bg-tertiary: #f4eff9;
+  --text-primary: #3d3055;
+  --text-secondary: #8b7fa8;
+  --text-tertiary: #b8aed0;
+  --accent: #f7a8b8;
+  --accent-hover: #f38da3;
+  --accent2: #a8e6cf;
+  --accent3: #c4b5fd;
+  --accent4: #fdd6b2;
+  --danger: #ff6b8a;
+  --danger-bg: rgba(255,107,138,0.1);
+  --divider: rgba(61,48,85,0.08);
+  --shadow-sm: 0 1px 3px rgba(61,48,85,0.04);
+  --shadow-md: 0 4px 16px rgba(61,48,85,0.06);
+  --shadow-lg: 0 8px 32px rgba(61,48,85,0.08);
+  --glass-bg: rgba(255,255,255,0.62);
+  --glass-blur: blur(20px) saturate(160%);
+  --glass-border: rgba(61,48,85,0.05);
 
   --space-xs: 4px;
   --space-sm: 8px;
@@ -39,602 +42,445 @@
   --space-lg: 24px;
   --space-xl: 32px;
   --space-2xl: 48px;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
+
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --duration-fast: 120ms;
-  --duration-normal: 200ms;
-  --duration-slow: 350ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #000000;
-    --bg-secondary: #1c1c1e;
-    --bg-tertiary: #2c2c2e;
-    --text-primary: #f5f5f7;
-    --text-secondary: #98989d;
-    --text-tertiary: #636366;
-    --accent-bg: rgba(255,107,138,0.12);
-    --danger-bg: rgba(255,69,58,0.12);
-    --divider: rgba(255,255,255,0.1);
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-    --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
-    --glass-bg: rgba(28,28,30,0.72);
-    --glass-border: rgba(255,255,255,0.08);
+    --bg-primary: #1a1625;
+    --bg-secondary: #241f33;
+    --bg-tertiary: #2d2740;
+    --text-primary: #ede8f5;
+    --text-secondary: #a89cc4;
+    --text-tertiary: #6d6085;
+    --divider: rgba(255,255,255,0.08);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    --glass-bg: rgba(36,31,51,0.62);
+    --glass-border: rgba(255,255,255,0.06);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
-
 @media (prefers-reduced-transparency: reduce) {
   :root { --glass-bg: var(--bg-secondary); --glass-blur: none; }
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
-
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100vh; min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* ============ Ambient Orbs ============ */
+.ambient-orbs {
+  position: fixed; inset:0; pointer-events: none; z-index:0; overflow:hidden;
+}
+.orb {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.28;
+  animation: orbFloat 18s ease-in-out infinite alternate;
+}
+.orb:nth-child(1) {
+  width: 360px; height: 360px; background: var(--accent);
+  top: -10%; left: -5%; animation-delay: 0s; animation-duration: 22s;
+}
+.orb:nth-child(2) {
+  width: 280px; height: 280px; background: var(--accent3);
+  top: 50%; right: -8%; animation-delay: -6s; animation-duration: 20s;
+}
+.orb:nth-child(3) {
+  width: 240px; height: 240px; background: var(--accent2);
+  bottom: -5%; left: 20%; animation-delay: -12s; animation-duration: 24s;
+}
+.orb:nth-child(4) {
+  width: 200px; height: 200px; background: var(--accent4);
+  top: 30%; left: 40%; animation-delay: -3s; animation-duration: 26s;
+}
+@keyframes orbFloat {
+  0% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(40px,-30px) scale(1.1); }
+  66% { transform: translate(-20px,20px) scale(0.9); }
+  100% { transform: translate(10px,-10px) scale(1.05); }
 }
 
 /* ============ Login ============ */
 .login-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: var(--space-lg);
-  background: var(--bg-primary);
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; min-height:100dvh; padding:var(--space-lg);
+  position:relative; z-index:1;
 }
-
 .login-card {
-  background: var(--bg-secondary);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: var(--radius-xl);
   padding: var(--space-2xl) var(--space-xl);
-  width: 100%;
-  max-width: 360px;
-  text-align: center;
+  width:100%; max-width:360px; text-align:center;
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--divider);
+  border: 1px solid var(--glass-border);
+  animation: cardEnter 500ms var(--ease-spring);
 }
-
-.login-card .icon { font-size: 44px; margin-bottom: var(--space-md); display: block; }
-
+@keyframes cardEnter {
+  from { opacity:0; transform: translateY(24px) scale(0.96); }
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+.login-card .icon { font-size:52px; margin-bottom:var(--space-md); display:block; }
 .login-card h1 {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--text-primary);
-  margin-bottom: var(--space-xs);
+  font-size:28px; font-weight:700; letter-spacing:-0.02em;
+  line-height:1.1; color:var(--text-primary); margin-bottom:var(--space-xs);
 }
-
 .login-card .subtitle {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-xl);
-  line-height: 1.4;
+  font-size:15px; color:var(--text-secondary); margin-bottom:var(--space-xl); line-height:1.4;
 }
-
-.login-card .input-group { position: relative; margin-bottom: var(--space-md); }
-
 .login-card input {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--divider);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  font-size: 16px;
-  text-align: center;
-  outline: none;
+  width:100%; padding:14px 16px; border-radius:var(--radius-full);
+  border:1.5px solid var(--divider); background:var(--bg-tertiary);
+  color:var(--text-primary); font-size:16px; text-align:center; outline:none;
   transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-  -webkit-appearance: none;
+  -webkit-appearance:none;
 }
-
-.login-card input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-.login-card input::placeholder { color: var(--text-tertiary); }
-
+.login-card input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(247,168,184,0.15); }
+.login-card input::placeholder { color:var(--text-tertiary); }
 .login-card button {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--accent);
-  color: #fff;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
-  letter-spacing: -0.01em;
+  width:100%; padding:14px; border:none; border-radius:var(--radius-full);
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color:#fff; font-size:17px; font-weight:600; cursor:pointer;
+  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  letter-spacing:-0.01em; box-shadow: 0 4px 20px rgba(247,168,184,0.3);
 }
-
-.login-card button:active { transform: scale(0.97); }
-.login-card button:hover { opacity: 0.92; }
-
-.login-card .error {
-  color: var(--danger);
-  font-size: 13px;
-  margin-top: var(--space-sm);
-  display: none;
-}
-
+.login-card button:active { transform:scale(0.96); }
+.login-card button:hover { opacity:0.92; box-shadow: 0 6px 28px rgba(247,168,184,0.4); }
+.login-card .error { color:var(--danger); font-size:13px; margin-top:var(--space-sm); display:none; }
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
+  0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}
 }
 
 /* ============ Main ============ */
 .main-wrap {
-  display: none;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-bottom: calc(var(--space-2xl) + env(safe-area-inset-bottom, 0px));
+  display:none; min-height:100vh; min-height:100dvh;
+  padding-bottom:calc(var(--space-2xl) + env(safe-area-inset-bottom,0px));
+  position:relative; z-index:1;
 }
 
-/* ============ Header — Glass ============ */
+/* ============ Header Glass ============ */
 .header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position:sticky; top:0; z-index:100;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 0.5px solid var(--glass-border);
-  padding: 12px var(--space-md);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 14px var(--space-md);
+  display:flex; align-items:center; justify-content:space-between;
 }
-
-.header h1 {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  line-height: 1.2;
+.header h1 { font-size:20px; font-weight:700; letter-spacing:-0.02em; color:var(--text-primary); }
+.header .right-btns { display:flex; gap:8px; align-items:center; }
+.header button {
+  background:var(--bg-tertiary); border:none; color:var(--text-secondary);
+  padding:8px 16px; border-radius:var(--radius-full); font-size:13px; font-weight:500;
+  cursor:pointer; transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
 }
+.header button:active { transform:scale(0.95); }
+.header button.select-mode-btn { background:var(--accent); color:#fff; display:none; }
 
-.header .logout-btn {
-  background: var(--bg-tertiary);
-  border: none;
-  color: var(--text-secondary);
-  padding: 7px 16px;
-  border-radius: var(--radius-full);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
-  letter-spacing: -0.01em;
-}
-
-.header .logout-btn:active { transform: scale(0.95); background: var(--divider); }
-
-/* ============ Album Tabs ============ */
+/* ============ Tabs ============ */
 .album-tabs {
-  display: flex;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  display:flex; gap:var(--space-sm); padding:var(--space-md) var(--space-md) 4px;
+  overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
 }
-
-.album-tabs::-webkit-scrollbar { display: none; }
-
+.album-tabs::-webkit-scrollbar { display:none; }
 .album-tab {
-  flex-shrink: 0;
-  padding: 9px 20px;
-  border-radius: var(--radius-full);
-  border: none;
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
-  letter-spacing: -0.01em;
+  flex-shrink:0; padding:10px 22px; border-radius:var(--radius-full); border:none;
+  background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  color:var(--text-secondary); font-size:14px; font-weight:500; cursor:pointer;
+  white-space:nowrap; border:0.5px solid var(--glass-border);
+  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 }
-
-.album-tab:active { transform: scale(0.95); }
-.album-tab.active { background: var(--accent); color: #fff; font-weight: 600; }
-.album-tab .count { font-size: 12px; margin-left: 4px; opacity: 0.7; }
-
+.album-tab:active { transform:scale(0.96); }
+.album-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color:#fff; font-weight:600; border-color:transparent;
+  box-shadow: 0 2px 12px rgba(247,168,184,0.25);
+}
+.album-tab .count { font-size:12px; margin-left:4px; opacity:0.7; }
 .album-tab.add {
-  background: transparent;
-  border: 1.5px dashed var(--divider);
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  background:transparent; border:1.5px dashed var(--text-tertiary);
+  color:var(--text-tertiary); display:flex; align-items:center; gap:4px;
 }
-
-.album-tab.add:active { transform: scale(0.95); border-color: var(--accent); color: var(--accent); }
 
 /* ============ Actions Bar ============ */
 .actions-bar {
-  display: flex;
-  gap: var(--space-sm);
-  padding: 0 var(--space-md) var(--space-md);
-  flex-wrap: wrap;
+  display:flex; gap:var(--space-sm); padding: var(--space-md); flex-wrap:wrap;
 }
-
 .actions-bar button {
-  padding: 9px 18px;
-  border-radius: var(--radius-full);
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
-  letter-spacing: -0.01em;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  padding:10px 20px; border-radius:var(--radius-full); border:none;
+  font-size:14px; font-weight:500; cursor:pointer;
+  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  display:flex; align-items:center; gap:5px;
 }
+.actions-bar button:active { transform:scale(0.96); }
+.actions-bar button.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color:#fff; box-shadow:0 2px 12px rgba(247,168,184,0.2);
+}
+.actions-bar button.secondary { background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); color:var(--text-primary); border:0.5px solid var(--glass-border); }
+.actions-bar button.danger { background:var(--danger-bg); color:var(--danger); }
 
-.actions-bar button:active { transform: scale(0.97); }
-.actions-bar button.primary { background: var(--accent); color: #fff; }
-.actions-bar button.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
-.actions-bar button.danger { background: var(--bg-tertiary); color: var(--danger); }
-.actions-bar button:hover { opacity: 0.85; }
+/* ============ Selection Bar ============ */
+.selection-bar {
+  display:none; align-items:center; justify-content:space-between;
+  padding:10px var(--space-md); background:var(--glass-bg);
+  backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  border-bottom:0.5px solid var(--glass-border);
+  animation: slideDown 250ms var(--ease-out);
+}
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.selection-bar .count-label { font-size:14px; font-weight:600; color:var(--text-primary); }
+.selection-bar .actions { display:flex; gap:8px; }
+.selection-bar button {
+  padding:8px 16px; border-radius:var(--radius-full); border:none;
+  font-size:13px; font-weight:500; cursor:pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.selection-bar button:active { transform:scale(0.95); }
+.selection-bar button.cancel { background:var(--bg-tertiary); color:var(--text-secondary); }
+.selection-bar button.delete-sel { background:var(--danger); color:#fff; }
 
 /* ============ Photo Grid ============ */
 .photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--space-sm);
-  padding: 0 var(--space-md);
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+  gap:var(--space-sm); padding:var(--space-md);
 }
-
 .photo-item {
-  position: relative;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  aspect-ratio: 3/4;
-  background: var(--bg-tertiary);
-  cursor: pointer;
-  border: none;
-  transition: transform var(--duration-normal) var(--ease-out);
+  position:relative; border-radius:var(--radius-md); overflow:hidden;
+  aspect-ratio:3/4; background:var(--bg-tertiary); cursor:pointer;
+  border:0.5px solid var(--divider);
+  transition: transform 250ms var(--ease-spring), box-shadow 250ms var(--ease-out);
+  animation: photoEnter 400ms var(--ease-spring) both;
 }
-
-@media (hover: hover) and (pointer: fine) {
-  .photo-item:hover { transform: scale(1.03); }
+@keyframes photoEnter {
+  from { opacity:0; transform:scale(0.9) translateY(12px); }
+  to { opacity:1; transform:scale(1) translateY(0); }
 }
-
-.photo-item:active { transform: scale(0.97); }
-
+.photo-item:hover { transform:scale(1.03); box-shadow:0 8px 28px rgba(61,48,85,0.1); }
+.photo-item:active { transform:scale(0.97); }
+.photo-item.selected {
+  border:3px solid var(--accent);
+  box-shadow:0 0 0 4px rgba(247,168,184,0.15);
+}
+.photo-item.selected::after {
+  content:'✓'; position:absolute; top:8px; right:8px;
+  width:26px; height:26px; border-radius:50%; background:var(--accent);
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; z-index:5; animation: popIn 200ms var(--ease-spring);
+}
+@keyframes popIn { from { transform:scale(0); } to { transform:scale(1); } }
 .photo-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: opacity var(--duration-normal) var(--ease-out);
-  opacity: 0;
+  width:100%; height:100%; object-fit:cover; display:block;
+  transition: opacity 300ms var(--ease-out); opacity:0;
 }
-
-.photo-item img.loaded { opacity: 1; }
-
+.photo-item img.loaded { opacity:1; }
+.photo-item .note-badge {
+  position:absolute; bottom:6px; left:6px;
+  background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  color:#fff; font-size:11px; padding:3px 8px; border-radius:var(--radius-full);
+  display:none; max-width:calc(100% - 12px); overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+}
 .photo-item .photo-actions {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity var(--duration-normal) var(--ease-out);
+  position:absolute; top:6px; right:6px; display:flex; gap:4px;
+  opacity:0; transition: opacity 200ms var(--ease-out);
+  z-index:3;
 }
-
-@media (hover: hover) and (pointer: fine) {
-  .photo-item:hover .photo-actions { opacity: 1; }
-}
-
+.photo-item:hover .photo-actions, .photo-item .photo-actions.show { opacity:1; }
 .photo-item .photo-actions button {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  border: none;
-  background: rgba(0,0,0,0.45);
-  color: #fff;
-  font-size: 15px;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width:30px; height:30px; border-radius:50%; border:none;
+  background:rgba(0,0,0,0.45); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  color:#fff; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
   transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
 }
-
-.photo-item .photo-actions button:active { transform: scale(0.85); background: var(--danger); }
+.photo-item .photo-actions button:active { transform:scale(0.85); }
 
 /* ============ Empty State ============ */
 .empty-state {
-  text-align: center;
-  padding: var(--space-2xl) var(--space-lg);
-  color: var(--text-tertiary);
+  text-align:center; padding:var(--space-2xl) var(--space-lg); color:var(--text-tertiary);
+  animation: fadeIn 400ms var(--ease-out);
 }
-
-.empty-state .icon { font-size: 56px; margin-bottom: var(--space-md); opacity: 0.5; display: block; }
-.empty-state p { font-size: 16px; color: var(--text-secondary); letter-spacing: -0.01em; }
+.empty-state .icon { font-size:56px; margin-bottom:var(--space-md); opacity:0.5; display:block; }
+.empty-state p { font-size:16px; color:var(--text-secondary); }
 
 /* ============ Lightbox ============ */
 .lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0,0,0,0.96);
-  flex-direction: column;
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.96); flex-direction:column;
+  animation: fadeIn 200ms var(--ease-out);
 }
-
-.lightbox.open { display: flex; }
-
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.lightbox.open { display:flex; }
 .lightbox .top-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px var(--space-md);
-  padding-top: max(12px, env(safe-area-inset-top));
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px var(--space-md); padding-top:max(12px, env(safe-area-inset-top));
+  background:rgba(0,0,0,0.3); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-
+.lightbox .top-bar .left-btns { display:flex; gap:8px; }
 .lightbox .top-bar button {
-  background: rgba(255,255,255,0.12);
-  border: none;
-  color: #fff;
-  padding: 9px 18px;
-  border-radius: var(--radius-full);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
+  background:rgba(255,255,255,0.12); border:none; color:#fff;
+  padding:8px 16px; border-radius:var(--radius-full); font-size:14px; font-weight:500;
+  cursor:pointer; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
   transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  letter-spacing: -0.01em;
 }
-
-.lightbox .top-bar button:active { transform: scale(0.95); }
-
+.lightbox .top-bar button:active { transform:scale(0.95); background:rgba(255,255,255,0.25); }
 .lightbox .img-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-md);
-  overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: pan-x;
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding:var(--space-md); overflow:hidden; user-select:none; -webkit-user-select:none;
+  touch-action:pan-x;
 }
-
 .lightbox .img-wrap img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 4px;
+  max-width:100%; max-height:100%; object-fit:contain; border-radius:6px;
+  transition: transform 200ms var(--ease-out);
 }
-
-.lightbox .nav { position: absolute; top: 50%; transform: translateY(-50%); }
-.lightbox .nav.prev { left: 8px; }
-.lightbox .nav.next { right: 8px; }
-
+.lightbox .nav { position:absolute; top:50%; transform:translateY(-50%); }
+.lightbox .nav.prev { left:8px; } .lightbox .nav.next { right:8px; }
 .lightbox .nav button {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  border: none;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #fff;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:rgba(255,255,255,0.12); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  color:#fff; font-size:24px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
   transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
 }
-
-.lightbox .nav button:active { transform: scale(0.9); background: rgba(255,255,255,0.25); }
-
-.lightbox .info {
-  text-align: center;
-  padding: 12px var(--space-md);
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-  color: rgba(255,255,255,0.6);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+.lightbox .nav button:active { transform:scale(0.9); background:rgba(255,255,255,0.25); }
+.lightbox .info-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px var(--space-md); padding-bottom:max(10px, env(safe-area-inset-bottom));
+  background:rgba(0,0,0,0.3); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  color:rgba(255,255,255,0.7); font-size:13px; gap:8px;
 }
+.lightbox .info-bar .note-display {
+  flex:1; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+  color:rgba(255,255,255,0.85); cursor:pointer;
+  padding:4px 10px; border-radius:var(--radius-full); transition: background 150ms var(--ease-out);
+}
+.lightbox .info-bar .note-display:hover { background:rgba(255,255,255,0.08); }
+.lightbox .info-bar .edit-note-btn {
+  background:rgba(255,255,255,0.12); border:none; color:#fff;
+  padding:5px 12px; border-radius:var(--radius-full); font-size:12px; cursor:pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.lightbox .info-bar .edit-note-btn:active { transform:scale(0.95); }
 
 /* ============ Modal ============ */
 .modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-lg);
-  animation: fadeIn 200ms var(--ease-out);
+  display:none; position:fixed; inset:0; z-index:300;
+  background:rgba(0,0,0,0.35); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; padding:var(--space-lg);
+  animation:fadeIn 200ms var(--ease-out);
 }
-
-.modal-overlay.open { display: flex; }
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+.modal-overlay.open { display:flex; }
 .modal {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-xl);
-  padding: var(--space-lg);
-  width: 100%;
-  max-width: 360px;
-  box-shadow: var(--shadow-lg);
-  transform-origin: center;
-  animation: modalEnter 300ms var(--ease-drawer);
+  background:var(--bg-secondary); border-radius:var(--radius-xl);
+  padding:var(--space-lg); width:100%; max-width:380px;
+  box-shadow:var(--shadow-lg);
+  animation:modalEnter 350ms var(--ease-spring);
 }
-
 @keyframes modalEnter {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from{opacity:0;transform:scale(0.92) translateY(12px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
 }
-
-.modal h3 {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: var(--space-md);
-  color: var(--text-primary);
-  line-height: 1.3;
+.modal h3 { font-size:18px; font-weight:700; margin-bottom:var(--space-md); color:var(--text-primary); }
+.modal .modal-desc { font-size:14px; color:var(--text-secondary); margin-bottom:var(--space-md); line-height:1.5; }
+.modal input, .modal textarea {
+  width:100%; padding:13px 15px; border-radius:var(--radius-md);
+  border:1.5px solid var(--divider); background:var(--bg-tertiary);
+  color:var(--text-primary); font-size:16px; outline:none; font-family:inherit;
+  transition:border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 }
-
-.modal .modal-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-md);
-  line-height: 1.4;
-}
-
-.modal input {
-  width: 100%;
-  padding: 13px 15px;
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--divider);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  font-size: 16px;
-  outline: none;
-  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-}
-
-.modal input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-
-.modal .btns { display: flex; gap: var(--space-sm); margin-top: var(--space-md); justify-content: flex-end; }
-
+.modal input:focus, .modal textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(247,168,184,0.12); }
+.modal textarea { resize:none; min-height:80px; line-height:1.5; }
+.modal .btns { display:flex; gap:var(--space-sm); margin-top:var(--space-md); justify-content:flex-end; }
 .modal .btns button {
-  padding: 10px 22px;
-  border-radius: var(--radius-full);
-  border: none;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-out);
-  letter-spacing: -0.01em;
+  padding:10px 22px; border-radius:var(--radius-full); border:none;
+  font-size:15px; font-weight:500; cursor:pointer;
+  transition:transform var(--duration-fast) var(--ease-out);
 }
-
-.modal .btns button:active { transform: scale(0.95); }
-.modal .btns button.cancel { background: var(--bg-tertiary); color: var(--text-primary); }
-.modal .btns button.confirm { background: var(--accent); color: #fff; font-weight: 600; }
-.modal .btns button.danger { background: var(--danger); color: #fff; font-weight: 600; }
-
-/* ============ Upload Progress ============ */
-.upload-progress {
-  position: fixed;
-  bottom: calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 0.5px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  padding: 12px 20px;
-  z-index: 150;
-  display: none;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow-md);
-}
-
-.upload-progress .label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.upload-progress .bar {
-  width: 100px;
-  height: 4px;
-  background: var(--bg-tertiary);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.upload-progress .bar .fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width 300ms var(--ease-out);
+.modal .btns button:active { transform:scale(0.96); }
+.modal .btns button.cancel { background:var(--bg-tertiary); color:var(--text-primary); }
+.modal .btns button.confirm {
+  background:linear-gradient(135deg, var(--accent), var(--accent3));
+  color:#fff; font-weight:600;
 }
 
 /* ============ Toast ============ */
 .toast {
-  position: fixed;
-  top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
-  left: 50%;
-  transform: translateX(-50%) translateY(-120%);
-  background: var(--bg-secondary);
-  border: 0.5px solid var(--divider);
-  border-radius: var(--radius-full);
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  box-shadow: var(--shadow-md);
-  z-index: 350;
-  transition: transform 300ms var(--ease-drawer);
-  pointer-events: none;
+  position:fixed; top:calc(var(--space-md) + env(safe-area-inset-top,0px));
+  left:50%; transform:translateX(-50%) translateY(-130%);
+  background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  border:0.5px solid var(--glass-border); border-radius:var(--radius-full);
+  padding:10px 22px; font-size:14px; font-weight:500; color:var(--text-primary);
+  box-shadow:var(--shadow-md); z-index:350;
+  transition:transform 350ms var(--ease-spring);
+  pointer-events:none;
 }
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.danger { color:var(--danger); border-color:rgba(255,107,138,0.3); }
 
-.toast.show { transform: translateX(-50%) translateY(0); }
+/* ============ Upload Progress ============ */
+.upload-progress {
+  position:fixed; bottom:calc(var(--space-xl) + env(safe-area-inset-bottom,0px));
+  left:50%; transform:translateX(-50%);
+  background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+  border:0.5px solid var(--glass-border); border-radius:var(--radius-full);
+  padding:12px 22px; z-index:150; display:none; align-items:center; gap:10px;
+  box-shadow:var(--shadow-md);
+}
+.upload-progress .label { font-size:13px; font-weight:500; color:var(--text-secondary); white-space:nowrap; }
+.upload-progress .bar { width:100px; height:4px; background:var(--bg-tertiary); border-radius:2px; overflow:hidden; }
+.upload-progress .bar .fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent3)); border-radius:2px; transition:width 300ms var(--ease-out); }
 
 /* ============ Responsive ============ */
-@media (max-width: 480px) {
-  .photo-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; }
-  .header h1 { font-size: 17px; }
-  .album-tabs { padding: 12px var(--space-md); gap: 6px; }
-  .album-tab { padding: 8px 16px; font-size: 13px; }
-  .actions-bar { padding: 0 var(--space-md) 14px; gap: 6px; }
-  .actions-bar button { padding: 8px 14px; font-size: 13px; }
-  .login-card { padding: var(--space-xl) var(--space-lg); }
-  .login-card h1 { font-size: 24px; }
+@media (max-width:480px) {
+  .photo-grid { grid-template-columns:repeat(auto-fill, minmax(105px,1fr)); gap:6px; }
+  .header h1 { font-size:18px; }
+  .album-tabs { padding:12px var(--space-md) 4px; gap:6px; }
+  .album-tab { padding:8px 16px; font-size:13px; }
+  .actions-bar { padding:var(--space-md); gap:6px; }
+  .actions-bar button { padding:8px 15px; font-size:13px; }
+  .login-card { padding:var(--space-xl) var(--space-lg); }
+  .login-card h1 { font-size:24px; }
+  .lightbox .nav button { width:38px; height:38px; font-size:20px; }
 }
 </style>
 </head>
 <body>
 
+<div class="ambient-orbs">
+  <div class="orb"></div><div class="orb"></div><div class="orb"></div><div class="orb"></div>
+</div>
+
 <div class="login-wrap" id="loginWrap">
   <div class="login-card">
-    <span class="icon">📸</span>
+    <span class="icon">🌸</span>
     <h1>我们的相册</h1>
     <p class="subtitle">属于谢林海 &amp; 曾子珊的专属记忆</p>
-    <div class="input-group">
-      <input type="password" id="pwdInput" placeholder="请输入口令" autofocus autocomplete="off">
-    </div>
+    <input type="password" id="pwdInput" placeholder="请输入口令" autofocus autocomplete="off">
+    <br><br>
     <button onclick="checkPwd()">进入相册</button>
     <div class="error" id="loginError">口令错误，再试一次</div>
   </div>
@@ -643,7 +489,17 @@ body {
 <div class="main-wrap" id="mainWrap">
   <div class="header">
     <h1>我们的相册</h1>
-    <button class="logout-btn" onclick="logout()">退出</button>
+    <div class="right-btns">
+      <button class="select-mode-btn" id="selectModeBtn" onclick="toggleSelectMode()">选择</button>
+      <button onclick="logout()">退出</button>
+    </div>
+  </div>
+  <div class="selection-bar" id="selectionBar">
+    <span class="count-label" id="selCountLabel">已选 0 张</span>
+    <div class="actions">
+      <button class="cancel" onclick="toggleSelectMode()">取消</button>
+      <button class="delete-sel" onclick="batchDelete()">删除选中</button>
+    </div>
   </div>
   <div class="album-tabs" id="albumTabs"></div>
   <div class="actions-bar" id="actionsBar"></div>
@@ -656,7 +512,10 @@ body {
 
 <div class="lightbox" id="lightbox">
   <div class="top-bar">
-    <button onclick="downloadCurrentPhoto()">下载</button>
+    <div class="left-btns">
+      <button onclick="downloadCurrentPhoto()">下载</button>
+      <button onclick="deleteCurrentPhoto()">删除</button>
+    </div>
     <button onclick="closeLightbox()">关闭</button>
   </div>
   <div class="nav prev"><button onclick="lightboxNav(-1)">‹</button></div>
@@ -664,7 +523,11 @@ body {
   <div class="img-wrap" id="lightboxWrap">
     <img id="lightboxImg" src="" alt="" draggable="false">
   </div>
-  <div class="info" id="lightboxInfo"></div>
+  <div class="info-bar">
+    <span id="lightboxCount"></span>
+    <span class="note-display" id="lightboxNote" onclick="editCurrentNote()">点击添加备注…</span>
+    <button class="edit-note-btn" onclick="editCurrentNote()">编辑备注</button>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -677,19 +540,19 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-
 <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
 
 <script>
-const DB_NAME = 'OurAlbumDB_v2';
+const DB_NAME = 'OurAlbumDB_v3';
 const DB_VER = 1;
 const PASSWORD = 'wantaoxxx';
 let db = null;
 let currentAlbum = '默认相册';
 let lightboxPhotos = [];
 let lightboxIndex = 0;
-let isSwiping = false;
-let lightboxStartX = 0;
+let selectMode = false;
+let selectedIds = new Set();
+let toastTimer;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -707,7 +570,6 @@ function openDB() {
     req.onerror = () => reject(req.error);
   });
 }
-
 function ensureDefaultAlbum() {
   return new Promise((resolve) => {
     const tx = db.transaction('albums', 'readwrite');
@@ -726,22 +588,20 @@ function checkPwd() {
   } else {
     const err = document.getElementById('loginError');
     err.style.display = 'block';
-    err.style.animation = 'none';
-    err.offsetHeight;
+    err.style.animation = 'none'; err.offsetHeight;
     err.style.animation = 'shake 400ms cubic-bezier(0.23, 1, 0.32, 1)';
     document.getElementById('pwdInput').value = '';
     document.getElementById('pwdInput').focus();
   }
 }
-
 document.getElementById('pwdInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPwd(); });
 
 function logout() {
-  if (!confirm('确定要退出吗？')) return;
   document.getElementById('mainWrap').style.display = 'none';
   document.getElementById('loginWrap').style.display = 'flex';
   document.getElementById('pwdInput').value = '';
   document.getElementById('loginError').style.display = 'none';
+  if (selectMode) toggleSelectMode();
   closeLightbox();
 }
 
@@ -753,14 +613,12 @@ async function getAlbums() {
     tx.objectStore('albums').getAll().onsuccess = (e) => r(e.target.result || []);
   });
 }
-
 async function getPhotoCount(album) {
   return new Promise((r) => {
     const tx = db.transaction('photos', 'readonly');
     tx.objectStore('photos').index('album').count(album).onsuccess = (e) => r(e.target.result);
   });
 }
-
 async function renderAlbums() {
   const albums = await getAlbums();
   const c = document.getElementById('albumTabs');
@@ -769,11 +627,13 @@ async function renderAlbums() {
     const cnt = await getPhotoCount(a.name);
     html += `<div class="album-tab${a.name===currentAlbum?' active':''}" onclick="switchAlbum('${esc(a.name)}')">${esc(a.name)}<span class="count">${cnt}</span></div>`;
   }
-  html += '<div class="album-tab add" onclick="showAddAlbum()">+ 新建相册</div>';
+  html += '<div class="album-tab add" onclick="showAddAlbum()">+ 新建</div>';
   c.innerHTML = html;
 }
-
-function switchAlbum(name) { currentAlbum = name; renderAlbums(); renderPhotos(); }
+function switchAlbum(name) {
+  if (selectMode) toggleSelectMode();
+  currentAlbum = name; renderAlbums(); renderPhotos();
+}
 
 function showAddAlbum() {
   showModal('新建相册',
@@ -781,7 +641,6 @@ function showAddAlbum() {
     '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="addAlbum()">创建</button></div>');
   setTimeout(() => document.getElementById('newAlbumName')?.focus(), 150);
 }
-
 async function addAlbum() {
   const name = document.getElementById('newAlbumName').value.trim();
   if (!name) return;
@@ -792,8 +651,7 @@ async function addAlbum() {
   s.put({ name, created: Date.now() });
   closeModal();
   currentAlbum = name;
-  await renderAlbums();
-  await renderPhotos();
+  await renderAlbums(); await renderPhotos();
 }
 
 async function renameAlbum() {
@@ -802,7 +660,6 @@ async function renameAlbum() {
     `<input type="text" id="renameInput" value="${esc(currentAlbum)}" maxlength="20" autocomplete="off">`+
     '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="doRenameAlbum()">确认</button></div>');
 }
-
 async function doRenameAlbum() {
   const newName = document.getElementById('renameInput').value.trim();
   if (!newName || newName===currentAlbum) { closeModal(); return; }
@@ -817,18 +674,16 @@ async function doRenameAlbum() {
   aS.put({ name: newName, created: Date.now() });
   currentAlbum = newName;
   closeModal();
-  await renderAlbums();
-  await renderPhotos();
+  await renderAlbums(); await renderPhotos();
 }
 
 async function deleteAlbum() {
   if (currentAlbum === '默认相册') { showToast('默认相册不能删除'); return; }
   const cnt = await getPhotoCount(currentAlbum);
   showModal('删除相册',
-    `<p class="modal-desc">确定删除相册「${esc(currentAlbum)}」及其全部 ${cnt} 张照片？此操作不可撤销。</p>`+
-    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="danger" onclick="doDeleteAlbum()">删除</button></div>');
+    `<p class="modal-desc">确定删除「${esc(currentAlbum)}」及其 ${cnt} 张照片？</p>`+
+    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="doDeleteAlbum()" style="background:var(--danger)">删除</button></div>');
 }
-
 async function doDeleteAlbum() {
   const txP = db.transaction('photos','readwrite');
   const pS = txP.objectStore('photos');
@@ -839,8 +694,7 @@ async function doDeleteAlbum() {
   txA.objectStore('albums').delete(currentAlbum);
   currentAlbum = '默认相册';
   closeModal();
-  await renderAlbums();
-  await renderPhotos();
+  await renderAlbums(); await renderPhotos();
 }
 
 async function getPhotos(album) {
@@ -857,9 +711,9 @@ async function getPhotos(album) {
 async function renderPhotos() {
   const photos = await getPhotos(currentAlbum);
   document.getElementById('actionsBar').innerHTML =
-    '<button class="primary" onclick="document.getElementById(\'fileInput\').click()">上传照片</button>'+
-    '<button class="secondary" onclick="renameAlbum()">重命名</button>'+
-    '<button class="danger" onclick="deleteAlbum()">删除相册</button>';
+    `<button class="primary" onclick="document.getElementById('fileInput').click()">上传照片</button>`+
+    `<button class="secondary" onclick="renameAlbum()">重命名</button>`+
+    `<button class="danger" onclick="deleteAlbum()">删除相册</button>`;
 
   if (photos.length===0) {
     document.getElementById('photoGrid').innerHTML = '';
@@ -867,12 +721,56 @@ async function renderPhotos() {
   } else {
     document.getElementById('emptyState').style.display = 'none';
     let html = '';
-    photos.forEach((p,i) => {
-      html += `<div class="photo-item" onclick="openLightbox(${i})"><img src="${p.data}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="this.parentElement.remove()"><div class="photo-actions"><button onclick="event.stopPropagation();downloadPhoto(${p.id})">↓</button><button onclick="event.stopPropagation();deletePhoto(${p.id})">×</button></div></div>`;
+    photos.forEach((p, i) => {
+      const sel = selectedIds.has(p.id) ? ' selected' : '';
+      const noteHtml = p.note ? `<div class="note-badge" style="display:block">${esc(p.note)}</div>` : '<div class="note-badge"></div>';
+      html += `<div class="photo-item${sel}" data-id="${p.id}" id="photo-${p.id}">
+        <img src="${p.data}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="this.parentElement.remove()">
+        ${noteHtml}
+        <div class="photo-actions">
+          <button onclick="event.stopPropagation();editPhotoNote(${p.id})" title="备注">✎</button>
+          <button class="del-btn" onclick="event.stopPropagation();deleteSinglePhoto(${p.id})" title="删除">×</button>
+        </div>
+      </div>`;
     });
     document.getElementById('photoGrid').innerHTML = html;
+
+    // stagger animation
+    const items = document.querySelectorAll('.photo-item');
+    items.forEach((el, i) => {
+      el.style.animationDelay = `${Math.min(i * 50, 400)}ms`;
+    });
+
+    // click / long-press handlers
+    items.forEach(el => {
+      let pressTimer;
+      el.addEventListener('pointerdown', (e) => {
+        pressTimer = setTimeout(() => {
+          if (!selectMode) toggleSelectMode();
+          const id = parseInt(el.dataset.id);
+          toggleSelect(id);
+          el.classList.toggle('selected', selectedIds.has(id));
+          updateSelectionUI();
+          el.querySelector('.photo-actions')?.classList.add('show');
+        }, 500);
+      });
+      el.addEventListener('pointerup', (e) => {
+        clearTimeout(pressTimer);
+        if (selectMode) {
+          const id = parseInt(el.dataset.id);
+          toggleSelect(id);
+          el.classList.toggle('selected', selectedIds.has(id));
+          updateSelectionUI();
+        } else {
+          openLightbox(i);
+        }
+      });
+      el.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+      el.addEventListener('pointercancel', () => clearTimeout(pressTimer));
+    });
   }
   window._currentPhotos = photos;
+  updateSelectionUI();
 }
 
 function handleFiles(files) { if (files&&files.length) uploadFiles(Array.from(files),0); }
@@ -880,86 +778,178 @@ function handleFiles(files) { if (files&&files.length) uploadFiles(Array.from(fi
 async function uploadFiles(files, idx) {
   if (idx >= files.length) {
     document.getElementById('uploadProgress').style.display = 'none';
-    await renderAlbums();
-    await renderPhotos();
+    await renderAlbums(); await renderPhotos();
     showToast(`已添加 ${files.length} 张照片`);
     return;
   }
   const pg = document.getElementById('uploadProgress');
   pg.style.display = 'flex';
   document.getElementById('progressFill').style.width = Math.round((idx/files.length)*100)+'%';
-  document.getElementById('progressLabel').textContent = `正在添加 ${idx+1}/${files.length}`;
-
+  document.getElementById('progressLabel').textContent = `添加中 ${idx+1}/${files.length}`;
   const reader = new FileReader();
   reader.onload = (e) => {
     const tx = db.transaction('photos','readwrite');
     const s = tx.objectStore('photos');
-    s.add({ album: currentAlbum, name: files[idx].name, data: e.target.result, timestamp: Date.now() });
+    s.add({ album: currentAlbum, name: files[idx].name, data: e.target.result, note: '', timestamp: Date.now() });
     tx.oncomplete = () => uploadFiles(files, idx+1);
     tx.onerror = () => uploadFiles(files, idx+1);
   };
   reader.readAsDataURL(files[idx]);
 }
 
-function deletePhoto(id) {
+// ============ Select Mode ============
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  if (!selectMode) selectedIds.clear();
+  updateSelectionUI();
+  document.querySelectorAll('.photo-item').forEach(el => {
+    el.classList.toggle('selected', selectMode && selectedIds.has(parseInt(el.dataset.id)));
+    if (!selectMode) el.querySelector('.photo-actions')?.classList.remove('show');
+  });
+}
+
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+}
+
+function updateSelectionUI() {
+  const bar = document.getElementById('selectionBar');
+  const btn = document.getElementById('selectModeBtn');
+  const count = selectedIds.size;
+  document.getElementById('selCountLabel').textContent = `已选 ${count} 张`;
+  if (selectMode) {
+    bar.style.display = 'flex';
+    btn.textContent = '取消选择';
+    btn.style.display = 'inline-block';
+  } else {
+    bar.style.display = 'none';
+    btn.textContent = '选择';
+    btn.style.display = (window._currentPhotos && window._currentPhotos.length > 0) ? 'inline-block' : 'none';
+  }
+  document.getElementById('actionsBar').style.display = selectMode ? 'none' : 'flex';
+}
+
+async function batchDelete() {
+  if (selectedIds.size === 0) return;
+  if (!confirm(`确定删除选中的 ${selectedIds.size} 张照片吗？`)) return;
+  const tx = db.transaction('photos', 'readwrite');
+  const s = tx.objectStore('photos');
+  for (const id of selectedIds) s.delete(id);
+  await new Promise(r => { tx.oncomplete = r; });
+  selectedIds.clear();
+  selectMode = false;
+  updateSelectionUI();
+  await renderAlbums(); await renderPhotos();
+  showToast(`已删除选中的照片`, true);
+}
+
+async function deleteSinglePhoto(id) {
+  if (selectMode) return;
   if (!confirm('确定删除这张照片吗？')) return;
-  const tx = db.transaction('photos','readwrite');
-  tx.objectStore('photos').delete(Number(id));
-  tx.oncomplete = async () => { closeLightbox(); await renderAlbums(); await renderPhotos(); };
+  const tx = db.transaction('photos', 'readwrite');
+  tx.objectStore('photos').delete(id);
+  await new Promise(r => { tx.oncomplete = r; });
+  closeLightbox();
+  await renderAlbums(); await renderPhotos();
+  showToast('照片已删除', true);
 }
 
-function downloadPhoto(id) {
-  const p = (window._currentPhotos||[]).find(x => x.id==id);
-  if (p) triggerDownload(p.data, p.name||'photo.jpg');
+// ============ Note ============
+async function editPhotoNote(id) {
+  if (selectMode) return;
+  const photos = window._currentPhotos || [];
+  const p = photos.find(x => x.id === id);
+  if (!p) return;
+  showModal('编辑备注',
+    `<textarea id="noteInput" placeholder="为这张照片写点备注…" maxlength="200">${esc(p.note||'')}</textarea>`+
+    '<div class="btns"><button class="cancel" onclick="closeModal()">取消</button><button class="confirm" onclick="saveNote('+id+')">保存</button></div>');
+  setTimeout(() => document.getElementById('noteInput')?.focus(), 150);
+}
+async function saveNote(id) {
+  const note = document.getElementById('noteInput').value.trim();
+  const tx = db.transaction('photos', 'readwrite');
+  const s = tx.objectStore('photos');
+  const p = await new Promise(r => { s.get(id).onsuccess = (e) => r(e.target.result); });
+  if (p) { p.note = note; s.put(p); }
+  closeModal();
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    updateLightboxNote();
+  }
+  await renderPhotos();
+  showToast(note ? '备注已保存' : '备注已清除');
 }
 
+function editCurrentNote() {
+  const p = lightboxPhotos[lightboxIndex];
+  if (p) editPhotoNote(p.id);
+}
+
+function updateLightboxNote() {
+  const p = lightboxPhotos[lightboxIndex];
+  const el = document.getElementById('lightboxNote');
+  if (p && p.note) {
+    el.textContent = p.note;
+    el.style.fontStyle = 'normal';
+  } else {
+    el.textContent = '点击添加备注…';
+    el.style.fontStyle = 'italic';
+    el.style.opacity = '0.5';
+  }
+}
+
+// ============ Lightbox ============
 function openLightbox(index) {
-  lightboxPhotos = window._currentPhotos||[];
+  lightboxPhotos = window._currentPhotos || [];
   lightboxIndex = index;
   showLightboxImage();
+  updateLightboxNote();
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function showLightboxImage() {
   const p = lightboxPhotos[lightboxIndex];
   if (!p) return;
   document.getElementById('lightboxImg').src = p.data;
-  document.getElementById('lightboxInfo').textContent = `${p.name||''}  ·  ${lightboxIndex+1} / ${lightboxPhotos.length}`;
+  document.getElementById('lightboxCount').textContent = `${lightboxIndex+1} / ${lightboxPhotos.length}`;
 }
-
 function lightboxNav(dir) {
   const n = lightboxIndex+dir;
-  if (n>=0 && n<lightboxPhotos.length) { lightboxIndex=n; showLightboxImage(); }
+  if (n>=0 && n<lightboxPhotos.length) { lightboxIndex=n; showLightboxImage(); updateLightboxNote(); }
 }
-
 function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
 function downloadCurrentPhoto() {
   const p = lightboxPhotos[lightboxIndex];
   if (p) triggerDownload(p.data, p.name||'photo.jpg');
 }
+function deleteCurrentPhoto() {
+  const p = lightboxPhotos[lightboxIndex];
+  if (p) deleteSinglePhoto(p.id);
+}
 
-// Swipe in lightbox
-document.getElementById('lightboxWrap').addEventListener('pointerdown', function(e) {
-  isSwiping = true; lightboxStartX = e.clientX; this.setPointerCapture(e.pointerId);
-});
-document.getElementById('lightboxWrap').addEventListener('pointermove', function(e) {
-  if (!isSwiping) return;
-});
-document.getElementById('lightboxWrap').addEventListener('pointerup', function(e) {
-  if (!isSwiping) return;
-  isSwiping = false;
-  const dx = e.clientX - lightboxStartX;
-  if (Math.abs(dx) > 80) lightboxNav(dx>0 ? -1 : 1);
-});
+// Swipe
+(function(){
+  let swiping = false, startX = 0;
+  const wrap = document.getElementById('lightboxWrap');
+  wrap.addEventListener('pointerdown', function(e) { swiping=true; startX=e.clientX; this.setPointerCapture(e.pointerId); });
+  wrap.addEventListener('pointerup', function(e) {
+    if (!swiping) return; swiping=false;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 60) lightboxNav(dx>0 ? -1 : 1);
+  });
+})();
 
 document.addEventListener('keydown', (e) => {
-  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (!document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'Escape' && selectMode) toggleSelectMode();
+    return;
+  }
   if (e.key==='Escape') closeLightbox();
   if (e.key==='ArrowLeft') lightboxNav(-1);
   if (e.key==='ArrowRight') lightboxNav(1);
 });
 
+// ============ Modal helpers ============
 function showModal(title, content) {
   document.getElementById('modalContent').innerHTML = `<h3>${title}</h3>${content}`;
   document.getElementById('modalOverlay').classList.add('open');
@@ -969,15 +959,16 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
   if (e.target===document.getElementById('modalOverlay')) closeModal();
 });
 
-let toastTimer;
-function showToast(msg) {
+// ============ Toast ============
+function showToast(msg, isDanger) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.classList.add('show');
+  t.className = 'toast show' + (isDanger ? ' danger' : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+// ============ Utils ============
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function triggerDownload(url, name) { const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
 document.getElementById('fileInput').addEventListener('click', function(){ this.value=null; });
