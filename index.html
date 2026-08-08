@@ -48,16 +48,12 @@ body.no-scroll{overflow:hidden}
 .seg-btn.active{background:linear-gradient(135deg,var(--ac),var(--ac3));color:#fff;font-weight:600;box-shadow:0 2px 12px rgba(247,168,184,.2)}
 .seg-btn:active{transform:scale(.96)}
 
-/* Page transition — Apple glass morph */
-.page{display:none;padding:0 16px}
-.page.active{display:block;animation:pgIn .4s var(--e)}
-@keyframes pgIn{from{opacity:0;transform:translateY(12px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+/* ========== Page transitions — pure CSS driven, no overlay ========== */
+.page-wrap{position:relative;overflow:hidden;padding-top:4px}
+.page{display:block;position:absolute;top:0;left:0;width:100%;padding:0 16px;opacity:0;transform:translateY(8px);filter:blur(4px);pointer-events:none;transition:opacity .28s var(--e),transform .28s var(--e),filter .28s var(--e)}
+.page.active{position:relative;opacity:1;transform:translateY(0);filter:blur(0);pointer-events:auto}
 
-/* Glass transition overlay */
-.glass-overlay{position:fixed;inset:0;z-index:150;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);pointer-events:none;opacity:0;transition:opacity .25s var(--e)}
-.glass-overlay.active{opacity:1;transition:opacity .15s var(--e)}
-
-/* ========== Photos Grid ========== */
+/* ========== Photos Grid — 3D Dashboard ========== */
 .actions{display:flex;gap:8px;padding:8px 0 16px;flex-wrap:wrap}
 .actions button{padding:10px 20px;border-radius:var(--rf);border:none;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s var(--e),opacity .15s var(--e)}
 .actions button:active{transform:scale(.96)}
@@ -73,13 +69,14 @@ body.no-scroll{overflow:hidden}
 .sel-bar .cnl{background:var(--bg3);color:var(--tx2)}
 .sel-bar .del{background:var(--danger);color:#fff}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding-bottom:16px;perspective:800px}
 @media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr);gap:8px;padding:0 0 16px}}
-.card{position:relative;border-radius:var(--r3);overflow:hidden;aspect-ratio:4/5;background:var(--bg3);cursor:pointer;border:.5px solid var(--div);transition:transform .3s var(--es),box-shadow .3s var(--e);animation:pe .45s var(--es) both}
-@keyframes pe{from{opacity:0;transform:scale(.88) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.card:hover{transform:scale(1.03);box-shadow:var(--sh3)}
-.card:active{transform:scale(.96)}
-.card.sel{border:3px solid var(--ac);box-shadow:0 0 0 4px rgba(247,168,184,.15)}
+.card{position:relative;border-radius:var(--r3);overflow:hidden;aspect-ratio:4/5;background:var(--bg3);cursor:pointer;border:.5px solid var(--div);transform-style:preserve-3d;transition:transform .4s var(--es),box-shadow .35s var(--e),filter .35s var(--e);animation:pe .45s var(--es) both}
+@keyframes pe{from{opacity:0;transform:scale(.92) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.card:hover{transform:translateZ(12px) rotateX(2deg) rotateY(-1deg);box-shadow:0 12px 40px rgba(61,48,85,0.15)}
+@media(prefers-color-scheme:dark){.card:hover{box-shadow:0 12px 40px rgba(0,0,0,0.45)}}
+.card:active{transform:scale(.96) translateZ(4px)}
+.card.sel{border:3px solid var(--ac);box-shadow:0 0 0 4px rgba(247,168,184,.15);transform:translateZ(16px)}
 .card.sel::after{content:'✓';position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:5;animation:pi .25s var(--es)}
 @keyframes pi{from{transform:scale(0)}to{transform:scale(1)}}
 .card img,.card video{width:100%;height:100%;object-fit:cover;display:block}
@@ -115,11 +112,14 @@ body.no-scroll{overflow:hidden}
 .viewer .v-info .v-edit{background:rgba(255,255,255,.12);border:none;color:#fff;padding:5px 12px;border-radius:var(--rf);font-size:12px;cursor:pointer;transition:transform .15s var(--e)}
 .viewer .v-info .v-edit:active{transform:scale(.95)}
 
-/* ========== Notes (Memos & Recipes) ========== */
+/* ========== Notes (Memos & Recipes) — Dashboard big info cards ========== */
 .note-list{padding:8px 0 16px}
-.note-card{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--r3);padding:20px;border:.5px solid var(--gb);box-shadow:var(--sh2);margin-bottom:12px;transition:transform .3s var(--es),box-shadow .3s var(--e);animation:pe .4s var(--es) both;cursor:pointer}
+.note-card{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--r3);padding:20px;border:.5px solid var(--gb);box-shadow:var(--sh2);margin-bottom:12px;transition:transform .4s var(--es),box-shadow .35s var(--e);animation:pe .4s var(--es) both;cursor:pointer}
+.note-card:hover{transform:translateY(-2px);box-shadow:var(--sh3)}
 .note-card:active{transform:scale(.98)}
-.note-card h3{font-size:17px;font-weight:600;margin-bottom:6px;color:var(--tx)}
+.note-card .nc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:12px}
+.note-card .nc-header h3{font-size:17px;font-weight:600;color:var(--tx);flex:1;min-width:0}
+.note-card .nc-header .nc-ts{font-size:11px;color:var(--tx3);white-space:nowrap;padding-top:3px}
 .note-card .nc-body{font-size:14px;color:var(--tx2);line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:10px}
 .note-card .nc-imgs{display:flex;gap:8px;flex-wrap:wrap}
 .note-card .nc-imgs img{width:80px;height:80px;object-fit:cover;border-radius:var(--r);border:.5px solid var(--div);transition:transform .2s var(--es)}
@@ -176,12 +176,41 @@ body.no-scroll{overflow:hidden}
 .progress .lbl{font-size:13px;font-weight:500;color:var(--tx2);white-space:nowrap}
 .progress .bar{width:100px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
 .progress .bar .fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac3));border-radius:2px;transition:width .3s var(--e)}
+
+/* ========== Floating Action Button (FAB) ========== */
+.fab{position:fixed;right:20px;bottom:calc(28px + env(safe-area-inset-bottom,0));z-index:400;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:12px}
+.fab-menu{display:flex;flex-direction:column-reverse;align-items:flex-end;gap:10px;pointer-events:none}
+.fab.open .fab-menu{pointer-events:auto}
+.fab-item{display:flex;align-items:center;gap:8px;cursor:pointer;opacity:0;transform:translateX(20px) scale(.8);transition:opacity .35s var(--es),transform .35s var(--es);pointer-events:none}
+.fab.open .fab-item{opacity:1;transform:translateX(0) scale(1);pointer-events:auto}
+.fab.open .fab-item:nth-child(1){transition-delay:.04s}
+.fab.open .fab-item:nth-child(2){transition-delay:.08s}
+.fab.open .fab-item:nth-child(3){transition-delay:.12s}
+.fab-item-label{background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);font-size:13px;font-weight:500;padding:6px 14px;border-radius:var(--rf);border:.5px solid var(--gb);box-shadow:var(--sh2);white-space:nowrap}
+.fab-item-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);box-shadow:var(--sh2);border:.5px solid var(--gb);transition:transform .2s var(--es),box-shadow .2s var(--e)}
+.fab-item-btn:active{transform:scale(.92)}
+.fab-main{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac3));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(247,168,184,.35);transition:transform .4s var(--es),box-shadow .35s var(--e);z-index:1}
+.fab-main:active{transform:scale(.92)}
+.fab.open .fab-main{transform:rotate(45deg);box-shadow:0 4px 28px rgba(247,168,184,.45)}
+.fab-main::after{content:'+';display:block;line-height:1}
+@media(prefers-color-scheme:dark){
+.fab-main{box-shadow:0 4px 24px rgba(247,168,184,.25)}
+.fab.open .fab-main{box-shadow:0 4px 28px rgba(247,168,184,.35)}
+}
+@media(max-width:480px){
+.fab{right:14px;bottom:calc(20px + env(safe-area-inset-bottom,0));gap:10px}
+.fab-menu{gap:8px}
+.fab-main{width:48px;height:48px;font-size:22px}
+.fab-item-btn{width:38px;height:38px;font-size:16px}
+.fab-item-label{font-size:12px;padding:5px 12px}
+}
+/* FAB backdrop click-to-close */
+.fab-backdrop{position:fixed;inset:0;z-index:399;display:none}
+.fab.open ~ .fab-backdrop{display:block}
 </style>
 </head>
 <body>
 <div class="orbs"><div class="o"></div><div class="o"></div><div class="o"></div><div class="o"></div></div>
-
-<div class="glass-overlay" id="glassOverlay"></div>
 
 <div class="main" id="mainWrap">
 <div class="hdr"><h1>我们的相册</h1></div>
@@ -191,6 +220,7 @@ body.no-scroll{overflow:hidden}
 <button class="seg-btn" data-page="recipes">菜谱</button>
 </div></div>
 
+<div class="page-wrap">
 <div class="page active" id="page-photos">
 <div class="sel-bar" id="selBar"><span class="lbl" id="selLbl">已选 0 项</span><div class="bt"><button class="cnl" onclick="toggleSelect()">取消</button><button class="del" onclick="batchDel()">删除</button></div></div>
 <div class="actions" id="actionsBar"></div>
@@ -208,6 +238,7 @@ body.no-scroll{overflow:hidden}
 <div class="notes-actions"><button onclick="openEditor('recipes')">新建菜谱</button></div>
 <div class="note-list" id="recipeList"></div>
 <div class="empty" id="recipeEmpty"><span class="i">🍳</span><p>还没有菜谱，点击新建</p></div>
+</div>
 </div>
 </div>
 
@@ -248,25 +279,41 @@ if(!d.objectStoreNames.contains('notes')){const s=d.createObjectStore('notes',{k
 
 // ========== Init ==========
 document.addEventListener('DOMContentLoaded',initApp);
-async function initApp(){await openDB();initSegTabs();switchPage('photos')}
+async function initApp(){await openDB();initSegTabs();initFab();switchPage('photos')}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
-// ========== Glass transition on tab switch ==========
+// FAB
+function initFab(){
+const fab=document.getElementById('fab');
+const fabMain=document.getElementById('fabMain');
+const backdrop=document.getElementById('fabBackdrop');
+let open=false;
+function toggle(){open=!open;fab.classList.toggle('open',open)}
+fabMain.addEventListener('click',e=>{e.stopPropagation();toggle()});
+backdrop.addEventListener('click',()=>{open=false;fab.classList.remove('open')});
+document.querySelectorAll('.fab-item').forEach(el=>{el.addEventListener('click',()=>{
+open=false;fab.classList.remove('open');
+const action=el.dataset.action;
+if(action==='photos'){document.getElementById('fileInput').click()}
+if(action==='memos'){openEditor('memos')}
+if(action==='recipes'){openEditor('recipes')}
+})});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){open=false;fab.classList.remove('open')}});
+}
+
+// ========== Page transition — pure CSS driven, no overlay, no setTimeout ==========
 function switchPage(p){
 if(currentPage===p)return;
-const overlay=document.getElementById('glassOverlay');
-overlay.classList.add('active');
-setTimeout(()=>{
-if(selMode)toggleSelect();closeViewer();currentPage=p;
+if(selMode)toggleSelect();closeViewer();
+const prev=document.getElementById('page-'+currentPage);
+const next=document.getElementById('page-'+p);
+prev.classList.remove('active');
+next.classList.add('active');
+currentPage=p;
 document.querySelectorAll('#segTabs .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
-document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
-const target=document.getElementById('page-'+p);
-if(target)target.classList.add('active');
 if(p==='photos')renderPhotos();
 if(p==='memos')renderNotes('memos');
 if(p==='recipes')renderNotes('recipes');
-overlay.classList.remove('active');
-},200)
 }
 
 // ========== Photos ==========
@@ -328,8 +375,9 @@ emptyEl.style.display='none';
 let h='';
 notes.forEach((n,i)=>{
 const imgs=n.images&&n.images.length?`<div class="nc-imgs">${n.images.map(img=>`<img src="${img}" alt="">`).join('')}</div>`:'';
+const ts=formatTs(n.ts);
 h+=`<div class="note-card" style="animation-delay:${Math.min(i*50,300)}ms" onclick="openEditor('${page}',${n.id})">
-<h3>${esc(n.title||'无标题')}</h3>
+<div class="nc-header"><h3>${esc(n.title||'无标题')}</h3><span class="nc-ts">${ts}</span></div>
 <div class="nc-body">${esc((n.body||'').substring(0,150))}${(n.body||'').length>150?'…':''}</div>
 ${imgs}
 <div class="nc-acts" onclick="event.stopPropagation()">
@@ -366,12 +414,25 @@ function closeModal(){document.getElementById('modalOverlay').classList.remove('
 document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal()});
 document.getElementById('editor').addEventListener('click',function(e){if(e.target===this)closeEditor()});
 
-// ========== Toast ==========
+// ========== Toast & Utils ==========
 function toast(msg,d){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(d?' danger':'');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function triggerDownload(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
+function formatTs(ts){const d=new Date(ts);const now=new Date();const y=d.getFullYear();const M=String(d.getMonth()+1).padStart(2,'0');const day=String(d.getDate()).padStart(2,'0');const h=String(d.getHours()).padStart(2,'0');const m=String(d.getMinutes()).padStart(2,'0');if(y===now.getFullYear())return `${M}/${day} ${h}:${m}`;return `${y}/${M}/${day} ${h}:${m}`}
 document.getElementById('fileInput').addEventListener('click',function(){this.value=null});
 document.getElementById('edImgInput').addEventListener('click',function(){this.value=null});
 </script>
+
+<!-- FAB -->
+<div class="fab" id="fab">
+<div class="fab-menu">
+<div class="fab-item" data-action="photos"><span class="fab-item-label">添加照片</span><button class="fab-item-btn">📷</button></div>
+<div class="fab-item" data-action="memos"><span class="fab-item-label">新建备忘录</span><button class="fab-item-btn">📝</button></div>
+<div class="fab-item" data-action="recipes"><span class="fab-item-label">新建菜谱</span><button class="fab-item-btn">🍳</button></div>
+</div>
+<button class="fab-main" id="fabMain"></button>
+</div>
+<div class="fab-backdrop" id="fabBackdrop"></div>
+
 </body>
 </html>
