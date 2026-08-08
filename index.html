@@ -1,4 +1,4 @@
-<!-- v8.1 -->
+<!-- v8.2 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -359,7 +359,9 @@ closeModal();localStorage.gh_token=v;ghToken=v;initAfterToken()
 function b64dec(s){const bin=atob(s.replace(/\s/g,''));const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u)}
 function b64enc(s){const u=new TextEncoder().encode(s);let r='';for(let i=0;i<u.length;i++)r+=String.fromCharCode(u[i]);return btoa(r)}
 async function gGet(path){
-const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
+let r=await fetch('https://raw.githubusercontent.com/'+REPO+'/main/'+path);
+if(r.ok){return{text:await r.text(),sha:null}}
+r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
 if(r.status===404)return null;
 if(r.status===401||r.status===403)throw Error('Token无效');
 if(!r.ok)throw Error('网络错误('+r.status+')');
@@ -374,12 +376,16 @@ const j=await r.json();return j.content.sha
 
 /* Data load/save */
 async function loadData(){
+try{
 const r=await gGet(DF);
-if(r){dataS=JSON.parse(r.text);sha=r.sha}else{dataS={v:8,albums:[],items:[],notes:[],lm:Date.now()};sha=null}
+if(r&&r.text){dataS=JSON.parse(r.text);sha=r.sha;localStorage.alb_cache=r.text}
+else{dataS=lcCache()||{v:8,albums:[],items:[],notes:[],lm:Date.now()};sha=null}
+}catch(e){dataS=lcCache()||{v:8,albums:[],items:[],notes:[],lm:Date.now()};sha=null}
 }
+function lcCache(){try{const s=localStorage.alb_cache;return s?JSON.parse(s):null}catch(e){return null}}
 async function saveData(msg){
-if(!ghToken)return;dataS.lm=Date.now();
-try{sha=await gPut(DF,dataS,sha,msg||'Update')}catch(e){toast('同步失败：'+e.message,1)}
+if(!ghToken)return;dataS.lm=Date.now();const raw=JSON.stringify(dataS);
+try{sha=await gPut(DF,JSON.parse(raw),sha,msg||'Update');localStorage.alb_cache=raw}catch(e){toast('同步失败：'+e.message,1)}
 }
 
 /* Helpers */
@@ -412,7 +418,7 @@ initAfterToken()
 }
 async function initAfterToken(){
 initSegTabs();initFab();
-try{await loadData()}catch(e){toast('数据加载失败',1);return}
+await loadData();
 updateFabMenu();renderAlbums()
 }
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
