@@ -1,4 +1,4 @@
-<!-- v7.6 -->
+<!-- v8.0 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -338,267 +338,206 @@ body.no-scroll{overflow:hidden}
 <div class="fab-backdrop" id="fabBackdrop"></div>
 
 <script>
-/* ========== Database (v6) ========== */
-const DB='OurAlbumDB_v6',VER=1;
-let db,currentPage='photos',selMode=false,selIds=new Set(),toastT;
-let currentAlbumId=null,currentAlbumItems=[],vList=[],vIdx=0;
-let editingId=null,editingPage=null,edImgsData=[];
 
-function openDB(){return new Promise((rv,rj)=>{
-let oldDB=null;
-function doOpen(){
-const r=indexedDB.open(DB,VER);
-r.onupgradeneeded=e=>{
-const d=e.target.result;
-if(!d.objectStoreNames.contains('items')){const s=d.createObjectStore('items',{keyPath:'id',autoIncrement:true});s.createIndex('album_id','album_id',{unique:false});s.createIndex('ts','ts',{unique:false})}
-if(!d.objectStoreNames.contains('notes')){const s=d.createObjectStore('notes',{keyPath:'id',autoIncrement:true});s.createIndex('page','page',{unique:false});s.createIndex('ts','ts',{unique:false})}
-if(!d.objectStoreNames.contains('albums')){const s=d.createObjectStore('albums',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts',{unique:false})}
-};
-r.onsuccess=async e=>{
-db=e.target.result;
-if(oldDB){await migrateV5(oldDB);oldDB.close();indexedDB.deleteDatabase('OurAlbumDB_v5')}
-await ensureDefaultAlbum();rv(db)
-};
-r.onerror=()=>rj(r.error);
-r.onblocked=()=>rj(new Error('DB blocked'))
-}
-const rOld=indexedDB.open('OurAlbumDB_v5');
-rOld.onsuccess=e=>{oldDB=e.target.result;doOpen()};
-rOld.onerror=()=>doOpen();
-rOld.onblocked=()=>doOpen()
+/* ========== Cloud Sync v8.0 ========== */
+const REPO='xielinhai9-crypto/our-album',DF='data.json';
+let ghToken='',dataS={v:8,albums:[],items:[],notes:[],lm:0},sha=null,dbgSave=null;
+let currentPage='photos',currentAlbumId=null,currentAlbumItems=[],vList=[],vIdx=0;
+let selMode=false,selIds=new Set(),editingId=null,editingPage=null,edImgsData=[],toastT;
+
+/* Token */
+function getToken(){return localStorage.gh_token||''}
+function showTP(){showModal('连接云端','<p style="font-size:14px;color:var(--tx2);margin-bottom:12px">输入 GitHub Token 同步数据</p><input id="ti" type="password" placeholder="ghp_..." style="margin-bottom:4px"><p style="font-size:11px;color:var(--tx3);margin-bottom:8px">Token 保存在本地，仅用于同步</p><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="tcfm">确认</button></div>');
+setTimeout(()=>{document.getElementById('ti')?.focus()},200);
+document.getElementById('tcfm').addEventListener('click',()=>{
+const v=document.getElementById('ti').value.trim();
+if(!v||!v.startsWith('ghp_')){toast('请检查 Token 格式',1);return}
+closeModal();localStorage.gh_token=v;ghToken=v;initAfterToken()
 })}
 
-async function migrateV5(old){
-const items=await getAll(old,'items');const notes=await getAll(old,'notes');
-if(items.length){
-const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
-for(const it of items){
-if(it.page==='photos'){s.add({album_id:0,type:it.type||'image',name:it.name||'',data:it.data,note_me:it.note||'',note_partner:'',ts:it.ts||Date.now()})}
+/* GitHub API */
+async function gGet(path){
+const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
+if(r.status===404)return null;
+if(!r.ok)throw Error('API '+r.status);
+const j=await r.json();return{text:decodeURIComponent(escape(atob(j.content.replace(/\s/g,'')))),sha:j.sha}
 }
-await txDone(tx)
+async function gPut(path,content,shaVal,msg){
+const b=unescape(encodeURIComponent(JSON.stringify(content)));
+const body=JSON.stringify({message:msg||'Update',content:btoa(b),sha:shaVal,branch:'main'});
+const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path,{method:'PUT',headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json','Content-Type':'application/json'},body});
+if(!r.ok){
+if(r.status===409){toast('数据冲突，正在刷新...',1);await loadData();return gPut(path,content,sha,msg+' (retry)')}
+throw Error('API '+r.status)
 }
-if(notes.length){
-const tx=db.transaction('notes','readwrite');const s=tx.objectStore('notes');
-for(const n of notes){s.add(n)}
-await txDone(tx)
-}
-}
-function getAll(_db,store){return new Promise(rv=>{const tx=_db.transaction(store,'readonly');tx.objectStore(store).getAll().onsuccess=e=>rv(e.target.result||[])})}
-function txDone(tx){return new Promise(rv=>{tx.oncomplete=rv;tx.onerror=rv})}
-
-async function ensureDefaultAlbum(){
-const albums=await getAlbums();
-if(!albums.find(a=>a.id===0)){
-const tx=db.transaction('albums','readwrite');
-tx.objectStore('albums').add({id:0,name:'未分类',cover:null,ts:Date.now()});
-await txDone(tx)
-}
+const j=await r.json();return j.content.sha
 }
 
-/* ========== Albums ========== */
-function getAlbums(){return new Promise(rv=>{
-const tx=db.transaction('albums','readonly');
-tx.objectStore('albums').index('ts').getAll().onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>a.ts-b.ts);rv(l)}
-})}
-async function createAlbum(name){
-const tx=db.transaction('albums','readwrite');
-const id=await new Promise(rv=>{const r=tx.objectStore('albums').add({name,cover:null,ts:Date.now()});r.onsuccess=()=>rv(r.result)});
-await txDone(tx);return id
+/* Data load/save */
+async function loadData(){
+const r=await gGet(DF);
+if(r){dataS=JSON.parse(r.text);sha=r.sha}else{dataS={v:8,albums:[],items:[],notes:[],lm:Date.now()};sha=null}
 }
-async function deleteAlbum(id){
-if(id===0)return;
-const tx1=db.transaction('items','readwrite');const s1=tx1.objectStore('items');
-const items=await new Promise(rv=>{s1.index('album_id').getAll(id).onsuccess=e=>rv(e.target.result||[])});
-for(const it of items)s1.delete(it.id);
-await txDone(tx1);
-const tx2=db.transaction('albums','readwrite');tx2.objectStore('albums').delete(id);
-await txDone(tx2)
+async function saveData(msg){
+if(!ghToken)return;dataS.lm=Date.now();
+try{sha=await gPut(DF,dataS,sha,msg||'Update')}catch(e){toast('同步失败：'+e.message,1)}
 }
-function renameAlbum(id,name){return new Promise(rv=>{
-const tx=db.transaction('albums','readwrite');const s=tx.objectStore('albums');
-s.get(id).onsuccess=e=>{const a=e.target.result;if(a){a.name=name;s.put(a)}};tx.oncomplete=rv
-})}
 
-/* ========== Items (Photos) ========== */
-function getItemsByAlbum(albumId){return new Promise(rv=>{
-const tx=db.transaction('items','readonly');
-tx.objectStore('items').index('album_id').getAll(albumId).onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>b.ts-a.ts);rv(l)}
-})}
-function addItem(albumId,data){return new Promise(rv=>{
-const tx=db.transaction('items','readwrite');
-const isVid=data.type&&data.type.startsWith('video/');
-const r=tx.objectStore('items').add({album_id:albumId,type:isVid?'video':'image',name:data.name,data:data.data,note_me:'',note_partner:'',ts:Date.now()});
-r.onsuccess=()=>rv(r.result);tx.oncomplete=()=>rv(r.result)
-})}
-function deleteItem(id){return new Promise(rv=>{const tx=db.transaction('items','readwrite');tx.objectStore('items').delete(id);tx.oncomplete=rv})}
-function updateItemNote(id,field,value){return new Promise(rv=>{
-const tx=db.transaction('items','readwrite');const s=tx.objectStore('items');
-s.get(id).onsuccess=e=>{const it=e.target.result;if(it){it[field==='me'?'note_me':'note_partner']=value;s.put(it)}rv()}
-})}
+/* Helpers */
+function nid(arr){return arr.length?Math.max(...arr.map(x=>x.id||0))+1:1}
+function getId(id){return id}
 
-/* ========== Init ========== */
+/* Albums */
+function getAlbums(){return [...dataS.albums].sort((a,b)=>a.ts-b.ts)}
+async function createAlbum(name){const id=nid(dataS.albums);dataS.albums.push({id,name,cover:null,ts:Date.now()});await saveData('创建相册');return id}
+async function deleteAlbum(id){dataS.albums=dataS.albums.filter(a=>a.id!==id);dataS.items=dataS.items.filter(it=>it.album_id!==id);await saveData('删除相册')}
+async function renameAlbum(id,name){const a=dataS.albums.find(a=>a.id===id);if(a){a.name=name;await saveData('重命名相册')}}
+
+/* Items */
+function getItemsByAlbum(aid){return dataS.items.filter(it=>it.album_id===aid).sort((a,b)=>b.ts-a.ts)}
+async function addItem(aid,itemData){const id=nid(dataS.items);const it={id,album_id:aid,type:itemData.type||'image',name:itemData.name||'',data:itemData.data,note_me:'',note_partner:'',ts:Date.now()};dataS.items.push(it);await saveData('添加照片');const a=dataS.albums.find(a=>a.id===aid);if(a)a.cover=itemData.data;return id}
+async function deleteItem(id){dataS.items=dataS.items.filter(it=>it.id!==id);await saveData('删除照片')}
+async function updateItemNote(id,field,value){const it=dataS.items.find(it=>it.id===id);if(it){it[field==='me'?'note_me':'note_partner']=value;await saveData('更新备注')}}
+
+/* Notes */
+function getNotes(page){return dataS.notes.filter(n=>n.page===page).sort((a,b)=>b.ts-a.ts)}
+async function saveNote(nd){if(nd.id){const i=dataS.notes.findIndex(n=>n.id===nd.id);if(i>=0)dataS.notes[i]=nd;else dataS.notes.push(nd)}else{nd.id=nid(dataS.notes);dataS.notes.push(nd)}await saveData('保存笔记')}
+async function delNote(id){dataS.notes=dataS.notes.filter(n=>n.id!==id);await saveData('删除笔记')}
+
+/* Init */
 document.addEventListener('DOMContentLoaded',initApp);
-async function initApp(){initSegTabs();initFab();try{await openDB();if(!db)return;updateFabMenu();renderAlbums()}catch(e){toast('数据加载失败，请刷新页面',1);return}}
+async function initApp(){
+ghToken=getToken();
+if(!ghToken){showTP();return}
+initAfterToken()
+}
+async function initAfterToken(){
+initSegTabs();initFab();
+try{await loadData()}catch(e){toast('数据加载失败',1);return}
+updateFabMenu();renderAlbums()
+}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
-/* ========== FAB ========== */
+/* FAB */
 function initFab(){
-const fab=document.getElementById('fab');const fabMain=document.getElementById('fabMain');
-const backdrop=document.getElementById('fabBackdrop');const menu=document.getElementById('fabMenu');
+const fab=document.getElementById('fab'),fm=document.getElementById('fabMain'),bd=document.getElementById('fabBackdrop'),m=document.getElementById('fabMenu');
 let open=false;
-function toggle(){open=!open;fab.classList.toggle('open',open)}
-fabMain.addEventListener('click',e=>{e.stopPropagation();toggle()});
-backdrop.addEventListener('click',()=>{open=false;fab.classList.remove('open')});
-menu.querySelectorAll('.fab-item').forEach(el=>{el.addEventListener('click',()=>{
+function t(){open=!open;fab.classList.toggle('open',open)}
+fm.addEventListener('click',e=>{e.stopPropagation();t()});
+bd.addEventListener('click',()=>{open=false;fab.classList.remove('open')});
+m.querySelectorAll('.fab-item').forEach(el=>{el.addEventListener('click',()=>{
 open=false;fab.classList.remove('open');
-const action=el.dataset.action;
-if(action==='addPhoto'){
+const a=el.dataset.action;
+if(a==='addPhoto'){
 if(currentPage==='photos'){
 if(currentAlbumId!==null){document.getElementById('fileInput').click()}
 else{enterAlbum(0);setTimeout(()=>document.getElementById('fileInput').click(),400)}
-}
-}
-if(action==='album'){showNewAlbumModal()}
-if(action==='memos'){switchPage('memos');openEditor('memos')}
-if(action==='recipes'){switchPage('recipes');openEditor('recipes')}
+}}
+if(a==='album')showNewAlbumModal();
+if(a==='memos'){switchPage('memos');openEditor('memos')}
+if(a==='recipes'){switchPage('recipes');openEditor('recipes')}
 })});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){open=false;fab.classList.remove('open')}});
 updateFabMenu()
 }
 function updateFabMenu(){
 const items=document.querySelectorAll('#fabMenu .fab-item');
 if(currentPage==='photos'&&currentAlbumId!==null){
-items.forEach(el=>el.style.display=el.dataset.action==='addPhoto'?'flex':'none');
+items.forEach(el=>el.style.display=el.dataset.action==='addPhoto'?'flex':'none')
 }else if(currentPage==='photos'){
 items.forEach(el=>el.style.display=(el.dataset.action==='addPhoto'||el.dataset.action==='album')?'flex':'none');
-document.getElementById('fabLabelAdd').textContent='添加照片';
-}else{
-items.forEach(el=>el.style.display='flex');
-}
+document.getElementById('fabLabelAdd').textContent='添加照片'
+}else{items.forEach(el=>el.style.display='flex')}
 }
 
-/* ========== Page transitions ========== */
+/* Page transitions */
 function switchPage(p){
 if(currentPage===p)return;
 if(selMode)toggleSelect();closeViewer();
 if(currentPage==='photos'&&currentAlbumId!==null)exitAlbum();
-const prev=document.getElementById('page-'+currentPage);
-const next=document.getElementById('page-'+p);
-prev.classList.remove('active');
-next.classList.add('active');
-currentPage=p;
+const prev=document.getElementById('page-'+currentPage),next=document.getElementById('page-'+p);
+prev.classList.remove('active');next.classList.add('active');currentPage=p;
 document.querySelectorAll('#segTabs .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
 updateFabMenu();
-if(!db)return;
 if(p==='photos')renderAlbums();
 if(p==='memos')renderNotes('memos');
 if(p==='recipes')renderNotes('recipes')
 }
 
-/* ========== Album Views ========== */
+/* Album Views */
 async function renderAlbums(){
 currentAlbumId=null;
 document.getElementById('albumListView').style.display='block';
 document.getElementById('photosView').style.display='none';
 updateFabMenu();
 const albums=await getAlbums();
-const grid=document.getElementById('albumGrid');const empty=document.getElementById('albumEmpty');
+const grid=document.getElementById('albumGrid'),empty=document.getElementById('albumEmpty');
 if(!albums.length){grid.innerHTML='';empty.style.display='block'}else{
-empty.style.display='none';
-let h='';
+empty.style.display='none';let h='';
 for(const a of albums){
-const count=await new Promise(rv=>{
-const tx=db.transaction('items','readonly');
-tx.objectStore('items').index('album_id').count(a.id).onsuccess=e=>rv(e.target.result)
-});
-let cover='';
-const items=await getItemsByAlbum(a.id);
+const count=dataS.items.filter(it=>it.album_id===a.id).length;
+let cover='';const items=await getItemsByAlbum(a.id);
 if(items.length){const first=items[items.length-1];
-if(first.type==='image')cover=`<img class="ac-cover" src="${first.data}" alt="">`;
-else cover=`<div class="ac-empty">🎬</div>`;
-}else{cover=`<div class="ac-empty">📷</div>`}
-h+=`<div class="album-card" data-id="${a.id}" onclick="enterAlbum(${a.id})">
-${cover}
-<div class="ac-info"><div class="ac-name">${esc(a.name)}</div><div class="ac-count">${count} 张</div></div>
-</div>`
+if(first.type==='image')cover='<img class="ac-cover" src="'+first.data+'" alt="">';
+else cover='<div class="ac-empty">&#127916;</div>';
+}else{cover='<div class="ac-empty">&#128247;</div>'}
+h+='<div class="album-card" data-id="'+a.id+'" onclick="enterAlbum('+a.id+')">'+cover+'<div class="ac-info"><div class="ac-name">'+esc(a.name)+'</div><div class="ac-count">'+count+' 张</div></div></div>'
 }
-h+=`<button class="album-add-btn" onclick="showNewAlbumModal()">+</button>`;
+h+='<button class="album-add-btn" onclick="showNewAlbumModal()">+</button>';
 grid.innerHTML=h
 }
 }
 
 async function showNewAlbumModal(){
-showModal('新建相册','<input id="albumNameInput" placeholder="相册名称" maxlength="30"><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="albumCreateBtn">创建</button></div>');
-setTimeout(()=>document.getElementById('albumNameInput')?.focus(),150);
-document.getElementById('albumCreateBtn').addEventListener('click',async()=>{
-const name=document.getElementById('albumNameInput').value.trim();
-if(!name){toast('请输入名称');return}
-closeModal();
-const id=await createAlbum(name);
-await renderAlbums();
-enterAlbum(id)
-})
-}
+showModal('新建相册','<input id="aNI" placeholder="相册名称" maxlength="30"><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="aCB">创建</button></div>');
+setTimeout(()=>document.getElementById('aNI')?.focus(),150);
+document.getElementById('aCB').addEventListener('click',async()=>{
+const name=document.getElementById('aNI').value.trim();if(!name){toast('请输入名称');return}
+closeModal();const id=await createAlbum(name);await renderAlbums();enterAlbum(id)
+})}
 
-async function delAlbum(id){
-if(id===0)return;
-const count=await new Promise(rv=>{const tx=db.transaction('items','readonly');tx.objectStore('items').index('album_id').count(id).onsuccess=e=>rv(e.target.result)});
-if(!confirm(`删除相册及其 ${count} 张照片？`))return;
-await deleteAlbum(id);renderAlbums()
-}
-
-function showEditAlbumModal(id,currentName){
-showModal('编辑相册名称',`
-<input id="albumEditInput" value="${currentName}" placeholder="相册名称" maxlength="30">
-<div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="albumEditBtn">保存</button></div>
-`);
-setTimeout(()=>{const inp=document.getElementById('albumEditInput');inp?.focus();inp?.select()},150);
-document.getElementById('albumEditBtn').addEventListener('click',async()=>{
-const name=document.getElementById('albumEditInput').value.trim();
-if(!name){toast('请输入名称');return}
-closeModal();
-await renameAlbum(id,name);
-await renderAlbums();
-if(currentAlbumId===id){document.getElementById('ahTitle').textContent=name}
-toast('已保存')
-})
-}
+async function showEditAlbumModal(id){
+const a=dataS.albums.find(a=>a.id===id);if(!a)return;
+showModal('编辑名称','<input id="eNI" value="'+esc(a.name)+'" maxlength="30"><div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="eCB">保存</button></div>');
+setTimeout(()=>{const inp=document.getElementById('eNI');inp?.focus();inp?.select()},150);
+document.getElementById('eCB').addEventListener('click',async()=>{
+const name=document.getElementById('eNI').value.trim();if(!name){toast('请输入名称');return}
+closeModal();await renameAlbum(id,name);document.getElementById('ahTitle').textContent=name;await renderAlbums();enterAlbum(id)
+})}
 
 async function enterAlbum(id){
 currentAlbumId=id;
+hideAllExceptPhotos();
+const a=dataS.albums.find(a=>a.id===id);
+document.getElementById('ahTitle').textContent=a?a.name:'未分类';
 document.getElementById('albumListView').style.display='none';
 document.getElementById('photosView').style.display='block';
-updateFabMenu();
-const albums=await getAlbums();const a=albums.find(x=>x.id===id);
-document.getElementById('ahTitle').textContent=a?a.name:'相册';
-document.getElementById('ahDel').style.display=id===0?'none':'';
-document.getElementById('ahEdit').onclick=()=>showEditAlbumModal(id,a?a.name:'未分类');
-renderAlbumPhotos(id)
+updateFabMenu();await renderAlbumPhotos(id)
 }
-
-function exitAlbum(){
-currentAlbumId=null;if(selMode)toggleSelect();
-document.getElementById('albumListView').style.display='block';
-document.getElementById('photosView').style.display='none';
+function hideAllExceptPhotos(){document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));document.getElementById('page-photos').classList.add('active');document.querySelectorAll('#segTabs .seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.page==='photos'));currentPage='photos'}
+async function exitAlbum(){
+currentAlbumId=null;document.getElementById('photosView').style.display='none';document.getElementById('albumListView').style.display='block';
 updateFabMenu();renderAlbums()
 }
-
 document.getElementById('ahBack').addEventListener('click',exitAlbum);
 document.getElementById('ahDel').addEventListener('click',()=>{if(currentAlbumId!==null)delAlbum(currentAlbumId)});
+document.getElementById('ahEdit').addEventListener('click',()=>{if(currentAlbumId!==null)showEditAlbumModal(currentAlbumId)});
 
-/* ========== Album Photos Grid ========== */
+async function delAlbum(id){
+if(!confirm('删除此相册及其中所有照片？'))return;
+await deleteAlbum(id);await renderAlbums()
+}
+
+/* Album Photos Grid */
 async function renderAlbumPhotos(albumId){
-const items=await getItemsByAlbum(albumId);
-currentAlbumItems=items;
+const items=await getItemsByAlbum(albumId);currentAlbumItems=items;
 document.getElementById('actionsBar').innerHTML='<button class="pri" onclick="document.getElementById(\'fileInput\').click()">添加</button><button class="sec" onclick="toggleSelect()">选择</button><button class="dgr" onclick="pageDel()">清空</button>';
 if(!items.length){document.getElementById('photoGrid').innerHTML='';document.getElementById('emptyState').style.display='block'}else{
-document.getElementById('emptyState').style.display='none';
-let h='';
+document.getElementById('emptyState').style.display='none';let h='';
 items.forEach((it,i)=>{
 const sel=selIds.has(it.id)?' sel':'';
-const nb=it.note_me||it.note_partner?`<div class="note-badge" style="display:block">${esc((it.note_me||'')+(it.note_partner?' · ':'')+(it.note_partner||''))}</div>`:'<div class="note-badge"></div>';
-if(it.type==='video'){h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}"><video src="${it.data}" muted preload="metadata"></video><div class="vid-badge"></div>${nb}<div class="c-acts"><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div></div>`}
-else{h+=`<div class="card${sel}" data-id="${it.id}" id="card-${it.id}"><img src="${it.data}" alt="" loading="lazy">${nb}<div class="c-acts"><button onclick="event.stopPropagation();delOne(${it.id})" title="删除">×</button></div></div>`}
+const nb=it.note_me||it.note_partner?'<div class="note-badge" style="display:block">'+esc((it.note_me||'')+(it.note_partner?' · ':'')+(it.note_partner||''))+'</div>':'<div class="note-badge"></div>';
+if(it.type==='video')h+='<div class="card'+sel+'" data-id="'+it.id+'" id="card-'+it.id+'"><video src="'+it.data+'" muted preload="metadata"></video><div class="vid-badge"></div>'+nb+'<div class="c-acts"><button onclick="event.stopPropagation();delOne('+it.id+')" title="删除">&times;</button></div></div>';
+else h+='<div class="card'+sel+'" data-id="'+it.id+'" id="card-'+it.id+'"><img src="'+it.data+'" alt="" loading="lazy">'+nb+'<div class="c-acts"><button onclick="event.stopPropagation();delOne('+it.id+')" title="删除">&times;</button></div></div>'
 });
 document.getElementById('photoGrid').innerHTML=h;
 const cards=document.querySelectorAll('#photoGrid .card');
@@ -607,212 +546,131 @@ cards.forEach(el=>{
 let pt;el.addEventListener('pointerdown',e=>{
 pt=setTimeout(()=>{if(!selMode)toggleSelect();const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel();el.querySelector('.c-acts')?.classList.add('show')},500)
 });
-el.addEventListener('pointerup',e=>{clearTimeout(pt);const idx=items.findIndex(x=>x.id===parseInt(el.dataset.id));if(selMode){const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel()}else if(idx>=0){openViewer(idx)}});
+el.addEventListener('pointerup',e=>{clearTimeout(pt);const idx=items.findIndex(x=>x.id===parseInt(el.dataset.id));if(selMode){const id=parseInt(el.dataset.id);selIds.has(id)?selIds.delete(id):selIds.add(id);el.classList.toggle('sel',selIds.has(id));updateSel()}else if(idx>=0)openViewer(idx)});
 el.addEventListener('pointerleave',()=>clearTimeout(pt));
 el.addEventListener('pointercancel',()=>clearTimeout(pt))
-})
-}
-updateSel()
-}
+})}updateSel()}
 
 function handleFiles(files){if(files&&files.length)uploadFiles(Array.from(files),0)}
 async function uploadFiles(files,i){
-if(i>=files.length){document.getElementById('progress').style.display='none';renderAlbumPhotos(currentAlbumId);toast(`已添加 ${files.length} 个文件`);updateAlbumCover();return}
+if(i>=files.length){document.getElementById('progress').style.display='none';renderAlbumPhotos(currentAlbumId);toast('已添加 '+files.length+' 个文件');return}
 const pg=document.getElementById('progress');pg.style.display='flex';
 document.getElementById('progressFill').style.width=Math.round(i/files.length*100)+'%';
-document.getElementById('progressLabel').textContent=`${i+1}/${files.length}`;
-const f=files[i];const isVid=f.type.startsWith('video/');
-const r=new FileReader();r.onload=e=>{addItem(currentAlbumId,{type:f.type,name:f.name,data:e.target.result}).then(()=>uploadFiles(files,i+1))};r.readAsDataURL(f)
+document.getElementById('progressLabel').textContent=(i+1)+'/'+files.length;
+const f=files[i],isVid=f.type.startsWith('video/');
+const r=new FileReader();r.onload=async e=>{await addItem(currentAlbumId,{type:f.type,name:f.name,data:e.target.result});uploadFiles(files,i+1)};r.readAsDataURL(f)
 }
-async function updateAlbumCover(){
-const items=await getItemsByAlbum(currentAlbumId);
-if(items.length){
-const cover=items[items.length-1].data;
-const tx=db.transaction('albums','readwrite');
-tx.objectStore('albums').get(currentAlbumId).onsuccess=e=>{const a=e.target.result;if(a){a.cover=cover;tx.objectStore('albums').put(a)}}
-}
-}
+
 function toggleSelect(){selMode=!selMode;if(!selMode)selIds.clear();updateSel();document.querySelectorAll('#photoGrid .card').forEach(el=>{el.classList.toggle('sel',selMode&&selIds.has(parseInt(el.dataset.id)));if(!selMode)el.querySelector('.c-acts')?.classList.remove('show')})}
-function updateSel(){const c=selIds.size;document.getElementById('selLbl').textContent=`已选 ${c} 项`;document.getElementById('selBar').style.display=selMode?'flex':'none';document.getElementById('actionsBar').style.display=selMode?'none':'flex'}
-async function batchDel(){if(!selIds.size)return;if(!confirm(`删除 ${selIds.size} 项？`))return;for(const id of selIds)await deleteItem(id);selIds.clear();selMode=false;updateSel();renderAlbumPhotos(currentAlbumId);updateAlbumCover();toast('已删除')}
-async function delOne(id){if(selMode)return;if(!confirm('确定删除？'))return;await deleteItem(id);closeViewer();renderAlbumPhotos(currentAlbumId);updateAlbumCover();toast('已删除')}
-async function pageDel(){const items=await getItemsByAlbum(currentAlbumId);if(!items.length)return;if(!confirm(`删除全部 ${items.length} 项？`))return;for(const it of items)await deleteItem(it.id);renderAlbumPhotos(currentAlbumId);updateAlbumCover();toast('已清空')}
+function updateSel(){const c=selIds.size;document.getElementById('selLbl').textContent='已选 '+c+' 项';document.getElementById('selBar').style.display=selMode?'flex':'none';document.getElementById('actionsBar').style.display=selMode?'none':'flex'}
+async function batchDel(){if(!selIds.size)return;if(!confirm('删除 '+selIds.size+' 项？'))return;for(const id of selIds)await deleteItem(id);selIds.clear();selMode=false;updateSel();renderAlbumPhotos(currentAlbumId);toast('已删除')}
+async function delOne(id){if(selMode)return;if(!confirm('确定删除？'))return;await deleteItem(id);closeViewer();renderAlbumPhotos(currentAlbumId);toast('已删除')}
+async function pageDel(){const items=await getItemsByAlbum(currentAlbumId);if(!items.length)return;if(!confirm('删除全部 '+items.length+' 项？'))return;for(const it of items)await deleteItem(it.id);renderAlbumPhotos(currentAlbumId);toast('已清空')}
 
-/* ========== Viewer (with transition) ========== */
-function openViewer(index){
-const items=currentAlbumItems;
-vList=items;vIdx=index;
-const item=items[index];
-const card=document.getElementById('card-'+item.id);
-const cardRect=card?card.getBoundingClientRect():null;
-const el=item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
-const otherEl=item.type==='video'?document.getElementById('vImg'):document.getElementById('vVideo');
-
-otherEl.style.display='none';
-if(item.type==='video'){el.src=item.data;el.style.display='block';el.currentTime=0}
-else{el.src=item.data;el.style.display='block'}
-el.style.transform='';el.style.opacity='';el.style.willChange='transform,opacity';
-const viewer=document.getElementById('viewer');
-viewer.classList.add('open');
-document.body.classList.add('no-scroll');
-document.querySelector('.v-backdrop').animate([{opacity:0},{opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'});
-document.querySelector('.v-top').animate([{opacity:0},{opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'});
-if(cardRect){
-const vw=window.innerWidth;const vh=window.innerHeight;
-const targetMaxW=vw*0.9;const targetMaxH=vh*0.55;
-let targetW,targetH;
-const aspect=cardRect.width/cardRect.height;
-if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){targetW=targetMaxW;targetH=targetW/aspect}
-else{targetH=targetMaxH;targetW=targetH*aspect}
-const scale=Math.min(cardRect.width/targetW,cardRect.height/targetH);
-const tx=(cardRect.left+cardRect.width/2)-(vw/2);
-const ty=(cardRect.top+cardRect.height/2)-(vh/2-20);
-el.animate([{transform:`translate(${tx}px,${ty}px) scale(${scale})`,opacity:.85},{transform:'translate(0,0) scale(1)',opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'})
-}else{el.animate([{opacity:.7},{opacity:1}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'})}
+/* Viewer */
+function openViewer(idx){
+vList=currentAlbumItems;vIdx=idx;showViewerItem()
+}
+function showViewerItem(){
+const it=vList[vIdx];if(!it)return;
+document.getElementById('viewer').classList.add('open');document.body.classList.add('no-scroll');
+const wrap=document.getElementById('viewer'),bd=wrap.querySelector('.v-backdrop'),top=wrap.querySelector('.v-top'),notes=wrap.querySelector('.v-notes'),vImg=document.getElementById('vImg'),vVid=document.getElementById('vVideo');
+vImg.style.display='none';vVid.style.display='none';
+if(it.type==='video'){vVid.src=it.data;vVid.style.display='block'}else{vImg.src=it.data;vImg.style.display='block'}
+bd.style.opacity='0';top.style.opacity='0';notes.style.opacity='0';
+requestAnimationFrame(()=>{
+Promise.all([
+bd.animate([{opacity:0},{opacity:1}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished,
+top.animate([{opacity:0,transform:'translateY(-8px)'},{opacity:1,transform:'translateY(0)'}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished,
+notes.animate([{opacity:0,transform:'translateY(20px)'},{opacity:1,transform:'translateY(0)'}],{duration:350,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished
+]).then(()=>{bd.style.opacity='1';top.style.opacity='1';notes.style.opacity='1'})
+});
 updateVNotes()
 }
-function closeViewer(){
-const item=vList[vIdx];
-const card=item?document.getElementById('card-'+item.id):null;
-const cardRect=card?card.getBoundingClientRect():null;
-const el=item&&item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
-const finish=()=>{
-document.getElementById('viewer').classList.remove('open');
-document.body.classList.remove('no-scroll');
-const vid=document.getElementById('vVideo');vid.pause();vid.removeAttribute('src');
-if(el){el.style.transform='';el.style.opacity='';el.style.willChange='auto'}
-document.querySelector('.v-backdrop').style.opacity='';
-document.querySelector('.v-top').style.opacity='';
-};
-const promises=[];
-promises.push(document.querySelector('.v-backdrop').animate([{opacity:1},{opacity:0}],{duration:280,easing:'cubic-bezier(0.55,0,1,0.45)',fill:'forwards'}).finished);
-promises.push(document.querySelector('.v-top').animate([{opacity:1},{opacity:0}],{duration:280,easing:'cubic-bezier(0.55,0,1,0.45)',fill:'forwards'}).finished);
-if(cardRect&&el){
-const vw=window.innerWidth;const vh=window.innerHeight;
-const targetMaxW=vw*0.9;const targetMaxH=vh*0.55;
-let targetW,targetH;
-const aspect=cardRect.width/cardRect.height;
-if(cardRect.width/targetMaxW>cardRect.height/targetMaxH){targetW=targetMaxW;targetH=targetW/aspect}
-else{targetH=targetMaxH;targetW=targetH*aspect}
-const scale=Math.min(cardRect.width/targetW,cardRect.height/targetH);
-const tx=(cardRect.left+cardRect.width/2)-(vw/2);
-const ty=(cardRect.top+cardRect.height/2)-(vh/2-20);
-promises.push(el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${tx}px,${ty}px) scale(${scale})`,opacity:.4}],{duration:300,easing:'cubic-bezier(0.55,0,1,0.45)',fill:'forwards'}).finished)
+async function closeViewer(){
+const v=document.getElementById('viewer'),bd=v.querySelector('.v-backdrop'),top=v.querySelector('.v-top'),notes=v.querySelector('.v-notes');
+await Promise.all([
+bd.animate([{opacity:1},{opacity:0}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished,
+top.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-8px)'}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished,
+notes.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(20px)'}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'}).finished
+]);
+v.classList.remove('open');document.body.classList.remove('no-scroll');
+document.getElementById('vImg').src='';document.getElementById('vVideo').src=''
 }
-Promise.all(promises).then(finish).catch(finish)
-}
-function viewerNav(dir){
-const n=vIdx+dir;if(n<0||n>=vList.length)return;vIdx=n;
-const item=vList[n];
-const el=item.type==='video'?document.getElementById('vVideo'):document.getElementById('vImg');
-const otherEl=item.type==='video'?document.getElementById('vImg'):document.getElementById('vVideo');
-otherEl.style.display='none';
-if(item.type==='video'){el.src=item.data;el.style.display='block';el.currentTime=0}
-else{el.src=item.data;el.style.display='block'}
-el.style.transform='';el.style.willChange='transform,opacity';
-el.animate([{opacity:.6},{opacity:1}],{duration:250,easing:'cubic-bezier(0.23,1,0.32,1)',fill:'forwards'});
-updateVNotes()
-}
-function downloadCurrent(){const it=vList[vIdx];if(it)triggerDownload(it.data,it.name||'file')}
-async function deleteCurrent(){const it=vList[vIdx];if(it){await deleteItem(it.id);vList.splice(vIdx,1);closeViewer();renderAlbumPhotos(currentAlbumId);updateAlbumCover()}}
+function viewerNav(d){if(vList.length<=1)return;vIdx=(vIdx+d+vList.length)%vList.length;showViewerItem()}
+function downloadCurrent(){const it=vList[vIdx];if(!it)return;triggerDownload(it.data,it.name||'photo')}
+async function deleteCurrent(){const it=vList[vIdx];if(!it||!confirm('确定删除？'))return;await deleteItem(it.id);vList.splice(vIdx,1);if(vList.length){if(vIdx>=vList.length)vIdx=vList.length-1;currentAlbumItems=vList;showViewerItem()}else closeViewer();renderAlbumPhotos(currentAlbumId);toast('已删除')}
 
-// Viewer swipe
+const vw=document.getElementById('viewer');
+vw.querySelector('.v-backdrop').addEventListener('click',closeViewer);
 (function(){
-let sw=false,sx=0;const w=document.querySelector('.v-media-wrap');
+const w=vw.querySelector('.v-media-wrap');let sw=false,sx=0;
 w.addEventListener('pointerdown',function(e){sw=true;sx=e.clientX;this.setPointerCapture(e.pointerId)});
 w.addEventListener('pointerup',function(e){if(!sw)return;sw=false;const dx=e.clientX-sx;if(Math.abs(dx)>60)viewerNav(dx>0?-1:1)})
 })();
 document.addEventListener('keydown',e=>{
-if(document.getElementById('viewer').classList.contains('open')){
-if(e.key==='Escape')closeViewer();
-if(e.key==='ArrowLeft')viewerNav(-1);
-if(e.key==='ArrowRight')viewerNav(1);return
-}
+if(vw.classList.contains('open')){if(e.key==='Escape')closeViewer();if(e.key==='ArrowLeft')viewerNav(-1);if(e.key==='ArrowRight')viewerNav(1);return}
 if(e.key==='Escape'&&selMode)toggleSelect()
 });
 
-// Dual notes
 let vnSaveTimer=null;
-function updateVNotes(){
-const it=vList[vIdx];
-document.getElementById('vnMe').value=it?it.note_me||'':'';
-document.getElementById('vnPartner').value=it?it.note_partner||'':''
-}
+function updateVNotes(){const it=vList[vIdx];document.getElementById('vnMe').value=it?it.note_me||'':'';document.getElementById('vnPartner').value=it?it.note_partner||'':''}
 function saveVNote(field){
-clearTimeout(vnSaveTimer);
-vnSaveTimer=setTimeout(()=>{
+clearTimeout(vnSaveTimer);vnSaveTimer=setTimeout(()=>{
 const it=vList[vIdx];if(!it)return;
 const val=document.getElementById(field==='me'?'vnMe':'vnPartner').value.trim();
-updateItemNote(it.id,field,val);
-it[field==='me'?'note_me':'note_partner']=val
-},300)
-}
+updateItemNote(it.id,field,val);it[field==='me'?'note_me':'note_partner']=val
+},300)}
 document.getElementById('vnMe').addEventListener('input',()=>saveVNote('me'));
 document.getElementById('vnPartner').addEventListener('input',()=>saveVNote('partner'));
-document.getElementById('vnMe').addEventListener('blur',()=>{clearTimeout(vnSaveTimer);saveVNote('me')});
-document.getElementById('vnPartner').addEventListener('blur',()=>{clearTimeout(vnSaveTimer);saveVNote('partner')});
 
-/* ========== Notes (Memos & Recipes) ========== */
-async function getNotes(page){return new Promise(r=>{const tx=db.transaction('notes','readonly');tx.objectStore('notes').index('page').getAll(page).onsuccess=e=>{const l=e.target.result||[];l.sort((a,b)=>b.ts-a.ts);r(l)}})}
+/* Notes */
 async function renderNotes(page){
 const notes=await getNotes(page);
 const listEl=document.getElementById(page==='memos'?'memoList':'recipeList');
 const emptyEl=document.getElementById(page==='memos'?'memoEmpty':'recipeEmpty');
 if(!notes.length){listEl.innerHTML='';emptyEl.style.display='block'}else{
-emptyEl.style.display='none';
-let h='';
+emptyEl.style.display='none';let h='';
 notes.forEach((n,i)=>{
-const imgs=n.images&&n.images.length?`<div class="nc-imgs">${n.images.map(img=>`<img src="${img}" alt="">`).join('')}</div>`:'';
-const ts=formatTs(n.ts);
-h+=`<div class="note-card" style="animation-delay:${Math.min(i*50,300)}ms" onclick="openEditor('${page}',${n.id})">
-<div class="nc-header"><h3>${esc(n.title||'无标题')}</h3><span class="nc-ts">${ts}</span></div>
-<div class="nc-body">${esc((n.body||'').substring(0,150))}${(n.body||'').length>150?'…':''}</div>
-${imgs}
-<div class="nc-acts" onclick="event.stopPropagation()">
-<button class="edit-btn" onclick="openEditor('${page}',${n.id})">编辑</button>
-<button class="del-btn" onclick="delNote(${n.id},'${page}')">删除</button>
-</div></div>`});
+const imgs=n.images&&n.images.length?'<div class="nc-imgs">'+n.images.map(img=>'<img src="'+img+'" alt="">').join('')+'</div>':'';
+h+='<div class="note-card" style="animation-delay:'+Math.min(i*50,300)+'ms" onclick="openEditor(\''+page+'\','+n.id+')"><div class="nc-header"><h3>'+esc(n.title||'无标题')+'</h3><span class="nc-ts">'+formatTs(n.ts)+'</span></div><div class="nc-body">'+esc((n.body||'').substring(0,150))+((n.body||'').length>150?'…':'')+'</div>'+imgs+'<div class="nc-acts" onclick="event.stopPropagation()"><button class="edit-btn" onclick="openEditor(\''+page+'\','+n.id+')">编辑</button><button class="del-btn" onclick="delNoteClick('+n.id+',\''+page+'\')">删除</button></div></div>'});
 listEl.innerHTML=h
 }}
-async function delNote(id,page){if(!confirm('确定删除？'))return;const tx=db.transaction('notes','readwrite');tx.objectStore('notes').delete(id);await new Promise(r=>{tx.oncomplete=r});renderNotes(page);toast('已删除')}
+async function delNoteClick(id,page){if(!confirm('确定删除？'))return;await delNote(id);renderNotes(page);toast('已删除')}
+
 function openEditor(page,id){
 editingPage=page;editingId=id||null;edImgsData=[];
 document.getElementById('edTitle').textContent=(id?'编辑':'新建')+(page==='memos'?'备忘录':'菜谱');
-document.getElementById('edTitleInput').value='';document.getElementById('edBodyInput').value='';
-document.getElementById('edImgs').innerHTML='';
-if(id){db.transaction('notes','readonly').objectStore('notes').get(id).onsuccess=e=>{const n=e.target.result;if(n){document.getElementById('edTitleInput').value=n.title||'';document.getElementById('edBodyInput').value=n.body||'';edImgsData=n.images||[];renderEdImgs()}}}
+document.getElementById('edTitleInput').value='';document.getElementById('edBodyInput').value='';document.getElementById('edImgs').innerHTML='';
+if(id){const n=dataS.notes.find(n=>n.id===id);if(n){document.getElementById('edTitleInput').value=n.title||'';document.getElementById('edBodyInput').value=n.body||'';edImgsData=n.images||[];renderEdImgs()}}
 document.getElementById('editor').classList.add('open')
 }
 function closeEditor(){document.getElementById('editor').classList.remove('open');editingId=null;editingPage=null;edImgsData=[]}
 function handleEdImgs(files){if(!files||!files.length)return;Array.from(files).forEach(f=>{const r=new FileReader();r.onload=e=>{edImgsData.push(e.target.result);renderEdImgs()};r.readAsDataURL(f)})}
-function renderEdImgs(){document.getElementById('edImgs').innerHTML=edImgsData.map((d,i)=>`<div class="ed-img"><img src="${d}" alt=""><button class="rm" onclick="edImgsData.splice(${i},1);renderEdImgs()">×</button></div>`).join('')}
+function renderEdImgs(){document.getElementById('edImgs').innerHTML=edImgsData.map((d,i)=>'<div class="ed-img"><img src="'+d+'" alt=""><button class="rm" onclick="edImgsData.splice('+i+',1);renderEdImgs()">&times;</button></div>').join('')}
 async function saveNoteContent(){
-if(!db){toast('数据加载中，请稍后重试',1);return}
-try{
 const title=document.getElementById('edTitleInput').value.trim();
 const body=document.getElementById('edBodyInput').value.trim();
 if(!title&&!body&&!edImgsData.length){toast('请输入内容');return}
-const data={page:editingPage,title,body,images:edImgsData,ts:Date.now()};
-const tx=db.transaction('notes','readwrite');const s=tx.objectStore('notes');
-if(editingId){data.id=editingId;s.put(data)}else{s.add(data)}
-await new Promise(r=>{tx.oncomplete=r});closeEditor();renderNotes(editingPage);toast('已保存')
-}catch(e){toast('保存失败，请重试',1)}
+const nd={id:editingId,page:editingPage,title,body,images:edImgsData,ts:Date.now()};
+await saveNote(nd);closeEditor();renderNotes(editingPage);toast('已保存')
 }
 document.getElementById('edSaveBtn').addEventListener('click',saveNoteContent);
 
-/* ========== Modal ========== */
-function showModal(title,content){document.getElementById('modalContent').innerHTML=`<h3>${title}</h3>${content}`;document.getElementById('modalOverlay').classList.add('open')}
+/* Modal */
+function showModal(title,content){document.getElementById('modalContent').innerHTML='<h3>'+title+'</h3>'+content;document.getElementById('modalOverlay').classList.add('open')}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
 document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal()});
 document.getElementById('editor').addEventListener('click',function(e){if(e.target===this)closeEditor()});
 
-/* ========== Toast & Utils ========== */
+/* Toast & Utils */
 function toast(msg,d){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(d?' danger':'');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function triggerDownload(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
-function formatTs(ts){const d=new Date(ts);const now=new Date();const y=d.getFullYear();const M=String(d.getMonth()+1).padStart(2,'0');const day=String(d.getDate()).padStart(2,'0');const h=String(d.getHours()).padStart(2,'0');const m=String(d.getMinutes()).padStart(2,'0');if(y===now.getFullYear())return `${M}/${day} ${h}:${m}`;return `${y}/${M}/${day} ${h}:${m}`}
+function formatTs(ts){const d=new Date(ts),now=new Date(),y=d.getFullYear(),M=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'),h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');if(y===now.getFullYear())return M+'/'+day+' '+h+':'+m;return y+'/'+M+'/'+day+' '+h+':'+m}
 document.getElementById('fileInput').addEventListener('click',function(){this.value=null});
 document.getElementById('edImgInput').addEventListener('click',function(){this.value=null});
+
 </script>
 </body>
 </html>
