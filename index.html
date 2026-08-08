@@ -437,7 +437,7 @@ s.get(id).onsuccess=e=>{const it=e.target.result;if(it){it[field==='me'?'note_me
 
 /* ========== Init ========== */
 document.addEventListener('DOMContentLoaded',initApp);
-async function initApp(){initSegTabs();initFab();switchPage('photos');try{await openDB()}catch(e){toast('数据加载失败，请刷新页面',1);return};if(currentPage==='photos')renderAlbums();if(currentPage==='memos')renderNotes('memos');if(currentPage==='recipes')renderNotes('recipes')}
+async function initApp(){initSegTabs();initFab();try{await openDB()}catch(e){toast('数据加载失败，请刷新页面',1);return};updateFabMenu();renderAlbums()}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
 /* ========== FAB ========== */
