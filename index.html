@@ -64,10 +64,11 @@ body.no-scroll{overflow:hidden}
 .album-card .ac-info{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff}
 .album-card .ac-info .ac-name{font-size:15px;font-weight:600;margin-bottom:2px}
 .album-card .ac-info .ac-count{font-size:12px;opacity:.75}
-.album-card .ac-del{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s var(--e),transform .15s var(--e);z-index:2}
-.album-card:hover .ac-del{opacity:1}
-.album-card .ac-del:active{transform:scale(.85)}
-.album-card .ac-del.hidden{display:none}
+.album-card .ac-btns{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .2s var(--e);z-index:2}
+.album-card:hover .ac-btns{opacity:1}
+.album-card .ac-btns.hidden{display:none}
+.album-card .ac-btns button{width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--e),background .15s var(--e)}
+.album-card .ac-btns button:active{transform:scale(.85)}
 .album-add-btn{aspect-ratio:4/3;border-radius:var(--r3);border:2px dashed var(--div);background:transparent;color:var(--tx3);font-size:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s var(--e)}
 .album-add-btn:hover{border-color:var(--ac);color:var(--ac);background:rgba(247,168,184,.06)}
 
@@ -413,6 +414,10 @@ await txDone(tx1);
 const tx2=db.transaction('albums','readwrite');tx2.objectStore('albums').delete(id);
 await txDone(tx2)
 }
+function renameAlbum(id,name){return new Promise(rv=>{
+const tx=db.transaction('albums','readwrite');const s=tx.objectStore('albums');
+s.get(id).onsuccess=e=>{const a=e.target.result;if(a){a.name=name;s.put(a)}};tx.oncomplete=rv
+})}
 
 /* ========== Items (Photos) ========== */
 function getItemsByAlbum(albumId){return new Promise(rv=>{
@@ -513,10 +518,14 @@ if(first.type==='image')cover=`<img class="ac-cover" src="${first.data}" alt="">
 else cover=`<div class="ac-empty">🎬</div>`;
 }else{cover=`<div class="ac-empty">📷</div>`}
 const delClass=a.id===0?'hidden':'';
+const edName=esc(a.name).replace(/'/g,"&#39;").replace(/"/g,'&quot;');
 h+=`<div class="album-card" data-id="${a.id}" onclick="enterAlbum(${a.id})">
 ${cover}
 <div class="ac-info"><div class="ac-name">${esc(a.name)}</div><div class="ac-count">${count} 张</div></div>
-<button class="ac-del ${delClass}" onclick="event.stopPropagation();delAlbum(${a.id})">×</button>
+<div class="ac-btns ${delClass}">
+<button class="ac-edit" onclick="event.stopPropagation();showEditAlbumModal(${a.id},'${edName}')">✎</button>
+<button class="ac-del" onclick="event.stopPropagation();delAlbum(${a.id})">×</button>
+</div>
 </div>`
 }
 h+=`<button class="album-add-btn" onclick="showNewAlbumModal()">+</button>`;
@@ -542,6 +551,23 @@ if(id===0)return;
 const count=await new Promise(rv=>{const tx=db.transaction('items','readonly');tx.objectStore('items').index('album_id').count(id).onsuccess=e=>rv(e.target.result)});
 if(!confirm(`删除相册及其 ${count} 张照片？`))return;
 await deleteAlbum(id);renderAlbums()
+}
+
+function showEditAlbumModal(id,currentName){
+showModal('编辑相册名称',`
+<input id="albumEditInput" value="${currentName}" placeholder="相册名称" maxlength="30">
+<div class="btns"><button class="cnl" onclick="closeModal()">取消</button><button class="cfm" id="albumEditBtn">保存</button></div>
+`);
+setTimeout(()=>{const inp=document.getElementById('albumEditInput');inp?.focus();inp?.select()},150);
+document.getElementById('albumEditBtn').addEventListener('click',async()=>{
+const name=document.getElementById('albumEditInput').value.trim();
+if(!name){toast('请输入名称');return}
+closeModal();
+await renameAlbum(id,name);
+await renderAlbums();
+if(currentAlbumId===id){document.getElementById('ahTitle').textContent=name}
+toast('已保存')
+})
 }
 
 async function enterAlbum(id){
