@@ -1,3 +1,4 @@
+<!-- v7.6 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -437,7 +438,7 @@ s.get(id).onsuccess=e=>{const it=e.target.result;if(it){it[field==='me'?'note_me
 
 /* ========== Init ========== */
 document.addEventListener('DOMContentLoaded',initApp);
-async function initApp(){initSegTabs();initFab();try{await openDB()}catch(e){toast('数据加载失败，请刷新页面',1);return};updateFabMenu();renderAlbums()}
+async function initApp(){initSegTabs();initFab();try{await openDB();if(!db)return;updateFabMenu();renderAlbums()}catch(e){toast('数据加载失败，请刷新页面',1);return}}
 function initSegTabs(){document.querySelectorAll('#segTabs .seg-btn').forEach(b=>{b.addEventListener('click',()=>switchPage(b.dataset.page))})}
 
 /* ========== FAB ========== */
@@ -786,13 +787,17 @@ function closeEditor(){document.getElementById('editor').classList.remove('open'
 function handleEdImgs(files){if(!files||!files.length)return;Array.from(files).forEach(f=>{const r=new FileReader();r.onload=e=>{edImgsData.push(e.target.result);renderEdImgs()};r.readAsDataURL(f)})}
 function renderEdImgs(){document.getElementById('edImgs').innerHTML=edImgsData.map((d,i)=>`<div class="ed-img"><img src="${d}" alt=""><button class="rm" onclick="edImgsData.splice(${i},1);renderEdImgs()">×</button></div>`).join('')}
 async function saveNoteContent(){
+if(!db){toast('数据加载中，请稍后重试',1);return}
+try{
 const title=document.getElementById('edTitleInput').value.trim();
 const body=document.getElementById('edBodyInput').value.trim();
 if(!title&&!body&&!edImgsData.length){toast('请输入内容');return}
 const data={page:editingPage,title,body,images:edImgsData,ts:Date.now()};
 const tx=db.transaction('notes','readwrite');const s=tx.objectStore('notes');
 if(editingId){data.id=editingId;s.put(data)}else{s.add(data)}
-await new Promise(r=>{tx.oncomplete=r});closeEditor();renderNotes(editingPage);toast('已保存')}
+await new Promise(r=>{tx.oncomplete=r});closeEditor();renderNotes(editingPage);toast('已保存')
+}catch(e){toast('保存失败，请重试',1)}
+}
 document.getElementById('edSaveBtn').addEventListener('click',saveNoteContent);
 
 /* ========== Modal ========== */
