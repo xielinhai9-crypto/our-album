@@ -393,14 +393,15 @@ else{dataS=lcCache()||{v:8,albums:[],items:[],notes:[],lm:Date.now()};sha=null}
 }
 function lcCache(){try{const s=localStorage.alb_cache;return s?JSON.parse(s):null}catch(e){return null}}
 async function saveData(msg){
-if(!ghToken)return;dataS.lm=Date.now();const raw=JSON.stringify(dataS);
+dataS.lm=Date.now();const raw=JSON.stringify(dataS);localStorage.alb_cache=raw;
+if(!ghToken)return;
 if(!sha){
   try{
     const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+DF,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
     if(r.ok){const j=await r.json();sha=j.sha}
   }catch(e){}
 }
-try{sha=await gPut(DF,JSON.parse(raw),sha,msg||'Update');localStorage.alb_cache=raw}catch(e){toast('同步失败：'+e.message,1)}
+try{sha=await gPut(DF,JSON.parse(raw),sha,msg||'Update')}catch(e){toast('同步失败：'+e.message,1)}
 }
 
 /* Helpers */
@@ -434,7 +435,7 @@ initAfterToken()
 async function initAfterToken(){
 try{
 const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+DF,{headers:{Authorization:'token '+ghToken,Accept:'application/vnd.github+json'}});
-if(r.status===401||r.status===403){toast('Token已失效，请重新输入',1);localStorage.removeItem('gh_token');showTP();return}
+if(r.status===401||r.status===403){toast('Token已失效，数据仅保存到本地',1);ghToken='';localStorage.removeItem('gh_token')}
 }catch(e){}
 initSegTabs();initFab();
 await loadData();
