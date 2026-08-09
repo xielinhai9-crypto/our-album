@@ -78,7 +78,7 @@ body.no-scroll{overflow:hidden}
 
 /* Album photos header */
 .album-hdr{display:flex;align-items:center;gap:12px;padding:4px 0 12px}
-.album-hdr .ah-back{width:36px;height:36px;border-radius:50%;border:none;background:var(--g);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--e);flex-shrink:0}
+.album-hdr .ah-back{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg3);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--e),background .2s var(--e);flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .album-hdr .ah-back:active{transform:scale(.9)}
 .album-hdr .ah-title{flex:1;font-size:17px;font-weight:600;text-align:center}
 .album-hdr .ah-acts{display:flex;gap:6px;flex-shrink:0}
@@ -426,7 +426,7 @@ async function renameAlbum(id,name){const a=dataS.albums.find(a=>a.id===id);if(a
 
 /* Items */
 function getItemsByAlbum(aid){return dataS.items.filter(it=>it.album_id===aid).sort((a,b)=>b.ts-a.ts)}
-async function addItem(aid,itemData){const id=nid(dataS.items);const it={id,album_id:aid,type:itemData.type||'image',name:itemData.name||'',data:itemData.data,note_me:'',note_partner:'',ts:Date.now()};dataS.items.push(it);await saveData('添加照片');const a=dataS.albums.find(a=>a.id===aid);if(a)a.cover=itemData.data;return id}
+async function addItem(aid,itemData){const id=nid(dataS.items);const it={id,album_id:aid,type:itemData.type||'image',name:itemData.name||'',data:itemData.data,note_me:'',note_partner:'',ts:Date.now()};dataS.items.push(it);await saveData('添加照片');const a=dataS.albums.find(a=>a.id===aid);if(a&&!a.cover)a.cover=itemData.data;return id}
 async function deleteItem(id){dataS.items=dataS.items.filter(it=>it.id!==id);await saveData('删除照片')}
 async function updateItemNote(id,field,value){const it=dataS.items.find(it=>it.id===id);if(it){it[field==='me'?'note_me':'note_partner']=value;await saveData('更新备注')}}
 
@@ -573,8 +573,11 @@ async function exitAlbum(){
 currentAlbumId=null;document.getElementById('photosView').style.display='none';document.getElementById('albumListView').style.display='block';
 updateFabMenu();renderAlbums()
 }
+document.getElementById('ahBack').addEventListener('touchstart',function(e){e.preventDefault();exitAlbum()},{passive:false});
 document.getElementById('ahBack').addEventListener('click',exitAlbum);
+document.getElementById('ahDel').addEventListener('touchstart',function(e){e.preventDefault();if(currentAlbumId!==null)delAlbum(currentAlbumId)},{passive:false});
 document.getElementById('ahDel').addEventListener('click',()=>{if(currentAlbumId!==null)delAlbum(currentAlbumId)});
+document.getElementById('ahEdit').addEventListener('touchstart',function(e){e.preventDefault();if(currentAlbumId!==null)showEditAlbumModal(currentAlbumId)},{passive:false});
 document.getElementById('ahEdit').addEventListener('click',()=>{if(currentAlbumId!==null)showEditAlbumModal(currentAlbumId)});
 
 async function delAlbum(id){
@@ -659,7 +662,7 @@ if(vi)vi.src='';if(vv)vv.src=''
 function viewerNav(d){if(vList.length<=1)return;vIdx=(vIdx+d+vList.length)%vList.length;showViewerItem()}
 function downloadCurrent(){const it=vList[vIdx];if(!it)return;triggerDownload(it.data,it.name||'photo')}
 async function deleteCurrent(){const it=vList[vIdx];if(!it||!confirm('确定删除？'))return;await deleteItem(it.id);vList.splice(vIdx,1);if(vList.length){if(vIdx>=vList.length)vIdx=vList.length-1;currentAlbumItems=vList;showViewerItem()}else closeViewer();renderAlbumPhotos(currentAlbumId);toast('已删除')}
-async function setCover(){const it=vList[vIdx];if(!it||!currentAlbumId)return;if(it.type!=='image'){toast('仅图片可设为封面',1);return}const a=dataS.albums.find(a=>a.id===currentAlbumId);if(!a)return;a.cover=it.data;await saveData('设置封面');toast('已设为封面')}
+async function setCover(){const it=vList[vIdx];if(!it||!currentAlbumId)return;if(it.type!=='image'){toast('仅图片可设为封面',1);return}const a=dataS.albums.find(a=>a.id===currentAlbumId);if(!a)return;a.cover=it.data;await saveData('设置封面');toast('已设为封面');closeViewer()}
 
 const vw=document.getElementById('viewer');
 vw.querySelector('.v-backdrop').addEventListener('click',closeViewer);
