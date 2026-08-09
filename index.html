@@ -304,7 +304,7 @@ body.no-scroll{overflow:hidden}
 <!-- Viewer -->
 <div class="viewer" id="viewer">
 <div class="v-backdrop" onclick="closeViewer()"></div>
-<div class="v-top"><div><button onclick="downloadCurrent()">下载</button><button onclick="deleteCurrent()" style="margin-left:6px">删除</button></div><button onclick="closeViewer()">关闭</button></div>
+<div class="v-top"><div><button onclick="downloadCurrent()">下载</button><button onclick="setCover()" style="margin-left:6px">设封面</button><button onclick="deleteCurrent()" style="margin-left:6px">删除</button></div><button onclick="closeViewer()">关闭</button></div>
 <div class="v-nav prev"><button onclick="viewerNav(-1)">‹</button></div>
 <div class="v-nav next"><button onclick="viewerNav(1)">›</button></div>
 <div class="v-media-wrap">
@@ -325,9 +325,9 @@ body.no-scroll{overflow:hidden}
 <textarea id="edBodyInput" placeholder="写点什么…"></textarea>
 <div class="ed-imgs" id="edImgs"></div>
 <div class="ed-btns">
-<div class="add-img" onclick="document.getElementById('edImgInput').click()" style="display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">添加图片</div>
-<div class="cnl" onclick="closeEditor()" style="touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">取消</div>
-<div class="cfm" id="edSaveBtn" onclick="saveNoteContent()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">保存</div>
+<div class="add-img" id="edAddImgBtn" style="display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">添加图片</div>
+<div class="cnl" id="edCancelBtn" style="touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">取消</div>
+<div class="cfm" id="edSaveBtn" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">保存</div>
 </div></div>
 <input type="file" id="edImgInput" accept="image/*" multiple style="display:none" onchange="handleEdImgs(this.files)"></div>
 
@@ -530,11 +530,11 @@ if(!albums.length){grid.innerHTML='';empty.style.display='block'}else{
 empty.style.display='none';let h='';
 for(const a of albums){
 const count=dataS.items.filter(it=>it.album_id===a.id).length;
-let cover='';const items=await getItemsByAlbum(a.id);
+let cover='';if(a.cover){cover='<img class="ac-cover" src="'+a.cover+'" alt="">'}else{const items=await getItemsByAlbum(a.id);
 if(items.length){const first=items[items.length-1];
 if(first.type==='image')cover='<img class="ac-cover" src="'+first.data+'" alt="">';
 else cover='<div class="ac-empty">&#127916;</div>';
-}else{cover='<div class="ac-empty">&#128247;</div>'}
+}else{cover='<div class="ac-empty">&#128247;</div>'}}
 h+='<div class="album-card" data-id="'+a.id+'" onclick="enterAlbum('+a.id+')">'+cover+'<div class="ac-info"><div class="ac-name">'+esc(a.name)+'</div><div class="ac-count">'+count+' 张</div></div></div>'
 }
 h+='<button class="album-add-btn" onclick="showNewAlbumModal()">+</button>';
@@ -659,6 +659,7 @@ if(vi)vi.src='';if(vv)vv.src=''
 function viewerNav(d){if(vList.length<=1)return;vIdx=(vIdx+d+vList.length)%vList.length;showViewerItem()}
 function downloadCurrent(){const it=vList[vIdx];if(!it)return;triggerDownload(it.data,it.name||'photo')}
 async function deleteCurrent(){const it=vList[vIdx];if(!it||!confirm('确定删除？'))return;await deleteItem(it.id);vList.splice(vIdx,1);if(vList.length){if(vIdx>=vList.length)vIdx=vList.length-1;currentAlbumItems=vList;showViewerItem()}else closeViewer();renderAlbumPhotos(currentAlbumId);toast('已删除')}
+async function setCover(){const it=vList[vIdx];if(!it||!currentAlbumId)return;if(it.type!=='image'){toast('仅图片可设为封面',1);return}const a=dataS.albums.find(a=>a.id===currentAlbumId);if(!a)return;a.cover=it.data;await saveData('设置封面');toast('已设为封面')}
 
 const vw=document.getElementById('viewer');
 vw.querySelector('.v-backdrop').addEventListener('click',closeViewer);
@@ -730,6 +731,18 @@ function triggerDownload(url,name){const a=document.createElement('a');a.href=ur
 function formatTs(ts){const d=new Date(ts),now=new Date(),y=d.getFullYear(),M=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'),h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');if(y===now.getFullYear())return M+'/'+day+' '+h+':'+m;return y+'/'+M+'/'+day+' '+h+':'+m}
 document.getElementById('fileInput').addEventListener('click',function(){this.value=null});
 document.getElementById('edImgInput').addEventListener('click',function(){this.value=null});
+
+/* v9.6: iOS editor button fix - use touchstart+click with debounce */
+(function bindEditorBtns(){
+  var sb=document.getElementById('edSaveBtn'),cb=document.getElementById('edCancelBtn'),ab=document.getElementById('edAddImgBtn');
+  var sd=false,cd=false,ad=false;
+  if(sb){sb.addEventListener('touchstart',function(e){e.preventDefault();if(sd)return;sd=true;saveNoteContent();setTimeout(function(){sd=false},500)},{passive:false});
+  sb.addEventListener('click',function(e){e.preventDefault();if(sd)return;saveNoteContent()})}
+  if(cb){cb.addEventListener('touchstart',function(e){e.preventDefault();if(cd)return;cd=true;closeEditor();setTimeout(function(){cd=false},500)},{passive:false});
+  cb.addEventListener('click',function(e){e.preventDefault();if(cd)return;closeEditor()})}
+  if(ab){ab.addEventListener('touchstart',function(e){e.preventDefault();if(ad)return;ad=true;document.getElementById('edImgInput').click();setTimeout(function(){ad=false},500)},{passive:false});
+  ab.addEventListener('click',function(e){e.preventDefault();if(ad)return;document.getElementById('edImgInput').click()})}
+})();
 
 </script>
 </body>
