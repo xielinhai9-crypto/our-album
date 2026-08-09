@@ -1,4 +1,4 @@
-<!-- v9.4 -->
+<!-- v9.5 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -173,6 +173,7 @@ body.no-scroll{overflow:hidden}
 .notes-actions{margin-bottom:12px}
 .notes-actions button{padding:10px 20px;border-radius:var(--rf);border:none;font-size:14px;font-weight:500;cursor:pointer;background:var(--ac);color:#fff;transition:transform .15s var(--e);touch-action:manipulation;pointer-events:auto!important}
 .notes-actions button:active{transform:scale(.96)}
+.notes-actions button:active{transform:scale(.96)}
 
 /* Editor */
 .editor{display:none;position:fixed;inset:0;z-index:250;align-items:flex-end;background:rgba(0,0,0,.35);touch-action:manipulation}
@@ -188,8 +189,8 @@ body.no-scroll{overflow:hidden}
 .editor .ed .ed-imgs .ed-img img{width:100%;height:100%;object-fit:cover;border-radius:var(--r)}
 .editor .ed .ed-imgs .ed-img .rm{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;border:none;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 .editor .ed .ed-btns{display:flex;gap:8px;justify-content:flex-end}
-.editor .ed .ed-btns button{padding:10px 22px;border-radius:var(--rf);border:none;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s var(--e);touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-appearance:button;-webkit-tap-highlight-color:transparent}
-.editor .ed .ed-btns button:active{transform:scale(.96)}
+.editor .ed .ed-btns .cfm,.editor .ed .ed-btns .cnl,.editor .ed .ed-btns .add-img{padding:10px 22px;border-radius:var(--rf);border:none;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s var(--e);touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;line-height:1.4}
+.editor .ed .ed-btns .cfm:active,.editor .ed .ed-btns .cnl:active,.editor .ed .ed-btns .add-img:active{transform:scale(.96)}
 .editor .ed .ed-btns .cnl{background:var(--bg3);color:var(--tx)}
 .editor .ed .ed-btns .cfm{background:var(--ac);color:#fff;font-weight:600;touch-action:manipulation}
 .editor .ed .ed-btns .add-img{background:var(--bg3);color:var(--tx2);font-size:13px}
@@ -287,13 +288,13 @@ body.no-scroll{overflow:hidden}
 </div>
 
 <div class="page" id="page-memos">
-<div class="notes-actions"><button type="button" onclick="openEditor('memos')" style="touch-action:manipulation">新建备忘录</button></div>
+<div class="notes-actions"><button type="button" onclick="openEditor('memos')" style="touch-action:manipulation;pointer-events:auto">新建备忘录</button></div>
 <div class="note-list" id="memoList"></div>
 <div class="empty" id="memoEmpty"><span class="i">📝</span><p>还没有备忘录，点击新建</p></div>
 </div>
 
 <div class="page" id="page-recipes">
-<div class="notes-actions"><button type="button" onclick="openEditor('recipes')" style="touch-action:manipulation">新建菜谱</button></div>
+<div class="notes-actions"><button type="button" onclick="openEditor('recipes')" style="touch-action:manipulation;pointer-events:auto">新建菜谱</button></div>
 <div class="note-list" id="recipeList"></div>
 <div class="empty" id="recipeEmpty"><span class="i">🍳</span><p>还没有菜谱，点击新建</p></div>
 </div>
@@ -324,9 +325,9 @@ body.no-scroll{overflow:hidden}
 <textarea id="edBodyInput" placeholder="写点什么…"></textarea>
 <div class="ed-imgs" id="edImgs"></div>
 <div class="ed-btns">
-<button class="add-img" type="button" onclick="document.getElementById('edImgInput').click()">添加图片</button>
-<button class="cnl" type="button" onclick="closeEditor()" style="touch-action:manipulation">取消</button>
-<button class="cfm" id="edSaveBtn" type="button" onclick="saveNoteContent()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent">保存</button>
+<div class="add-img" onclick="document.getElementById('edImgInput').click()" style="display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">添加图片</div>
+<div class="cnl" onclick="closeEditor()" style="touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">取消</div>
+<div class="cfm" id="edSaveBtn" onclick="saveNoteContent()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center" role="button" tabindex="0">保存</div>
 </div></div>
 <input type="file" id="edImgInput" accept="image/*" multiple style="display:none" onchange="handleEdImgs(this.files)"></div>
 
